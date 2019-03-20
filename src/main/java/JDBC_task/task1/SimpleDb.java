@@ -8,14 +8,20 @@ import java.sql.Statement;
 public class SimpleDb {
 
     public static void main(String[] args) {
-
-
         SimpleDb m = new SimpleDb();
         m.testDatabase();
     }
 
     private void testDatabase() {
-        String sqlCommand1 = "CREATE TABLE JC_CLIENTS1 (JC_CLIENTS SERIAL,    FIRST_NAME VARCHAR(50) NOT NULL,  LAST_NAME VARCHAR(50) NOT NULL,  BIRTH_DATE DATE NOT NULL, PHONE VARCHAR(50) NOT NULL, EMAIL VARCHAR(50) NOT NULL, PRIMARY KEY (JC_CLIENTS))";
+        String sqlCommand = "CREATE TABLE JC_CLIENTS1\n" +
+                "(\n" +
+                "        JC_CLIENTS SERIAL,\n" +
+                "        FIRST_NAME VARCHAR(50) NOT NULL,\n" +
+                "        LAST_NAME VARCHAR(50) NOT NULL,\n" +
+                "        BIRTH_DATE DATE NOT NULL,\n" +
+                "        PHONE VARCHAR(50) NOT NULL,\n" +
+                "        EMAIL VARCHAR(50) NOT NULL,\n" +
+                "        PRIMARY KEY (JC_CLIENTS))";
 
         try {
 //1. Прописка BD
@@ -40,7 +46,7 @@ public class SimpleDb {
         //Для выполнения команд SQL в классе Statement определено три метода:
             //- executeUpdate: выполняет такие команды, как CREATE TABLE,INSERT, UPDATE, DELETE, DROP TABLE.
                 // В качестве результата возвращает количество строк, затронутых операцией
-                stmt.executeUpdate(sqlCommand1);
+                stmt.executeUpdate(sqlCommand);
 
 
 
@@ -51,7 +57,7 @@ public class SimpleDb {
 
 
             //- executeQuery: выполняет команду SELECT. Возвращает объект ResultSet, который содержит результаты запроса
-                ResultSet rs = stmt.executeQuery("SELECT * FROM JC_CLIENTS1");
+                ResultSet rs = stmt.executeQuery("SELECT * FROM JC_CLIENTS");
                 while (rs.next()) {
                     String str = rs.getString("jc_clients") + ":" + rs.getString(2);
                     System.out.println("Client:" + str);
