@@ -8,6 +8,8 @@ import java.sql.Statement;
 public class SimpleDb {
 
     public static void main(String[] args) {
+
+
         SimpleDb m = new SimpleDb();
         m.testDatabase();
     }
