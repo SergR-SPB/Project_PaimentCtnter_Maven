@@ -65,12 +65,12 @@ public class SimpleDb_R {
     private static void unitDB() throws SQLException {
         Statement st = connection.createStatement();
         try {
-            st.execute("DROP TABLE IF EXECUTE Clients");
+            st.execute("DROP TABLE IF EXISTS Clients");
 
-            st.execute("CREATE TABLE Cliients (" +
-                    "id SERIAL NOT NULL PRIMARY KEY," +
-                    "name VARCHAR (20) NULL," +
-                    "age INT," +
+            st.execute("CREATE TABLE Clients (" +
+                    "id SERIAL NOT NULL PRIMARY KEY, " +
+                    "name VARCHAR(20) NOT NULL, " +
+                    "age INT" +
                     ")");
         } finally {
             st.close();
@@ -94,12 +94,19 @@ public class SimpleDb_R {
         String sAge = sc.nextLine();
         int age = Integer.parseInt(sAge);
 
-        try (PreparedStatement ps = connection.prepareStatement("INSENSITIVE INTO Clients")){
-
-
+        try (PreparedStatement ps = connection.prepareStatement("INSERT INTO " +
+                "Clients (name,age) VALUES (?,?)")){
+            ps.setString(1,name);
+            ps.setInt(2,age);
+            ps.executeUpdate();  // ------- for INSERT, UPDATE & DELETE
         }
     }
-    private static void insertRandomClient() {
+    private static void insertRandomClient()throws SQLException{
+        System.out.println("Enter clients count: ");
+        String sCount = sc.nextLine();
+        int count = Integer.parseInt(sCount);
+
+
     }
     private static void deleteClient() {
     }
