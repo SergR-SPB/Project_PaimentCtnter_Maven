@@ -14,6 +14,7 @@ package JDBC_task.task1.Rezylt_task1;
  6) найти всех клиентов, имя которых содержит заданную посдтроку (использовать preparedStatement)*/
 
 import java.sql.*;
+import java.util.Random;
 import java.util.Scanner;
 
 public class SimpleDb_R {
@@ -105,6 +106,30 @@ public class SimpleDb_R {
         System.out.println("Enter clients count: ");
         String sCount = sc.nextLine();
         int count = Integer.parseInt(sCount);
+        Random rnd = new Random();
+
+        connection.setAutoCommit(false);// ------------enable transactions
+
+
+        try{
+            try(PreparedStatement ps = connection.prepareStatement( "INSERT INTO Clients (name, age)" +
+                    "VALUES (?,?)")){
+                for (int i = 0; i<=count; i++){
+                    ps.setString(1,"Name"+i);
+                    ps.setInt(2, rnd.nextInt(50));
+                    ps.executeUpdate();
+                }
+                connection.commit();
+
+            }catch (Exception ex){
+                connection.rollback();
+            }
+
+
+        } finally {
+            connection.setAutoCommit(true);            // return to default mode
+        }
+
 
 
     }
