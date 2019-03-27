@@ -21,7 +21,7 @@ public class SimpleDb_R {
 
     private static final String DB_CONNECTION = "jdbc:postgresql://localhost:5432/Clients";
     private static final String DB_USER = "postgres";
-    private static final String DB_PASSWORD ="postgres";
+    private static final String DB_PASSWORD = "postgres";
 
     private static Connection connection;
     private static Scanner sc;
@@ -30,28 +30,35 @@ public class SimpleDb_R {
 
         sc = new Scanner(System.in);
 
-        try (Connection conn = DriverManager.getConnection(DB_CONNECTION, DB_USER, DB_PASSWORD))  {
+        try (Connection conn = DriverManager.getConnection(DB_CONNECTION, DB_USER, DB_PASSWORD)) {
             connection = conn;
             unitDB(); // метод  - создает таблицу и столбцы)
 
-            while (true){
+            while (true) {
                 showMenu(); // метод - создание мню в консоли
 
                 String s = sc.nextLine();
                 switch (s) {
-                    case "1":addClient();
+                    case "1":
+                        addClient();
                         break;
-                    case "2":insertRandomClient();
+                    case "2":
+                        insertRandomClient();
                         break;
-                    case "3":deleteClient();
+                    case "3":
+                        deleteClient();
                         break;
-                    case "4":changeClient();
+                    case "4":
+                        changeClient();
                         break;
-                    case "5":viewClients();
+                    case "5":
+                        viewClients();
                         break;
-                    case "6":viewClientsByAge();
+                    case "6":
+                        viewClientsByAge();
                         break;
-                    case "7":viewClientsByName();
+                    case "7":
+                        viewClientsByName();
                         break;
                     default:
                         return;
@@ -77,6 +84,7 @@ public class SimpleDb_R {
             st.close();
         }
     }
+
     private static void showMenu() {
         System.out.println("1. add client");
         System.out.println("2. add random client");
@@ -88,7 +96,7 @@ public class SimpleDb_R {
         System.out.println("->> ");
     }
 
-    private static void addClient()throws SQLException {
+    private static void addClient() throws SQLException {
         System.out.println("Enter client name: ");
         String name = sc.nextLine();
         System.out.println("Enter client age: ");
@@ -96,54 +104,113 @@ public class SimpleDb_R {
         int age = Integer.parseInt(sAge);
 
         try (PreparedStatement ps = connection.prepareStatement("INSERT INTO " +
-                "Clients (name,age) VALUES (?,?)")){
-            ps.setString(1,name);
-            ps.setInt(2,age);
+                "Clients (name,age) VALUES (?,?)")) {
+            ps.setString(1, name);
+            ps.setInt(2, age);
             ps.executeUpdate();  // ------- for INSERT, UPDATE & DELETE
         }
     }
-    private static void insertRandomClient()throws SQLException{
+
+    private static void insertRandomClient() throws SQLException {
         System.out.println("Enter clients count: ");
         String sCount = sc.nextLine();
         int count = Integer.parseInt(sCount);
         Random rnd = new Random();
 
         connection.setAutoCommit(false);// ------------enable transactions
-
-
-        try{
-            try(PreparedStatement ps = connection.prepareStatement( "INSERT INTO Clients (name, age)" +
-                    "VALUES (?,?)")){
-                for (int i = 0; i<=count; i++){
-                    ps.setString(1,"Name"+i);
+        try {
+            try (PreparedStatement ps = connection.prepareStatement("INSERT INTO Clients (name, age)" +
+                    "VALUES (?,?)")) {
+                for (int i = 0; i <= count; i++) {
+                    ps.setString(1, "Name" + i);
                     ps.setInt(2, rnd.nextInt(50));
                     ps.executeUpdate();
                 }
                 connection.commit();
-
-            }catch (Exception ex){
+            } catch (Exception ex) {
                 connection.rollback();
             }
-
-
         } finally {
-            connection.setAutoCommit(true);            // return to default mode
+            connection.setAutoCommit(true); // ---------return to default mode
+        }
+    }
+
+    private static void deleteClient() throws SQLException {
+        System.out.println("Enter client ID: ");
+        String sId = sc.nextLine();
+        int id = Integer.parseInt(sId);
+
+        try (PreparedStatement ps = connection.prepareStatement
+                ("DELETE FROM Clients WHERE id= " + id)) {
+            ps.executeUpdate();
+        }
+    }
+
+    private static void changeClient() throws SQLException {
+        System.out.println("Enter clients name: ");
+        String name = sc.nextLine();
+
+        System.out.println("Enter new age: ");
+        String sAge = sc.nextLine();
+        int age = Integer.parseInt(sAge);
+
+        try (PreparedStatement ps = connection.prepareStatement
+                ("UPDATE Cliens SET age = ? WHERE  name=?")) {
+            ps.setInt(1, age);
+            ps.setString(2, name);
+            ps.executeUpdate();
         }
 
+    }
 
-
-    }
-    private static void deleteClient() {
-    }
-    private static void changeClient() {
-    }
-    private static void viewClients() {
-    }
-    private static void viewClientsByAge() {
-    }
-    private static void viewClientsByName() {
+    private static void viewClients() throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Clients")) {
+            try (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
+        }
     }
 
 
+    private static void viewClientsByAge() throws SQLException {
+        System.out.println("Enter min age: ");
+        String sAge = sc.nextLine();
+        int age = Integer.parseInt(sAge);
 
+        try (Statement s = connection.createStatement()) {
+            try (ResultSet rs = s.executeQuery("SELECT *FROM Clients WHERE age>" + age)) {
+                printResultSet(rs);
+            }
+        }
+    }
+
+    private static void viewClientsByName() throws SQLException {
+        System.out.println("Enter part of name: ");
+        String namePart = sc.nextLine();
+        try (PreparedStatement ps = connection.prepareStatement
+                ("SELECT * FROM Clients WHERE name like CONCAT" +
+                        "('%', ?, '%')")) {
+            ps.setString(1, namePart);
+            try (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
+        }
+    }
+
+
+    private static void printResultSet(ResultSet rs) throws SQLException {
+        ResultSetMetaData md = rs.getMetaData();
+
+        for(int i = 1; i<=md.getColumnCount();i++){
+            System.out.print(md.getColumnName(i)+"\t\t");
+        }
+        System.out.println();
+
+        while (rs.next()){
+            for(int i=1; i<=md.getColumnCount();i++){
+                System.out.print(rs.getString(i)+"\t\t");
+            }
+            System.out.println();
+        }
+    }
 }
