@@ -4,10 +4,10 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Scanner;
 
-public class addClient {
+public class AddClient {
     private static Scanner sc;
 
-    private static void addClient() throws SQLException {
+    public static void addClient() throws SQLException {
         sc = new Scanner(System.in);
         System.out.println("Enter client name: ");
         String name = sc.nextLine();

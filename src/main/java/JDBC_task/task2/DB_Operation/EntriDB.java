@@ -8,10 +8,10 @@ import java.util.Scanner;
 //Подключение к DB
 public class EntriDB {
 
-    static Connection connection;
+    public static Connection connection;
 
 
-    private static void entriDB() throws SQLException {
+    public static void entriDB() throws SQLException {
 
         Connection conn = DriverManager.getConnection
                 (KeyEntryInDB.getDbConnection(), KeyEntryInDB.getDbUser(), KeyEntryInDB.getDbPassword());
