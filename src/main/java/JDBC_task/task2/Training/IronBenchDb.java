@@ -1,0 +1,457 @@
+package JDBC_task.task2.Training;
+
+
+    /*
+   источник http://sql-tutorial.ru/ru/book_computers_database.html
+   ++21 упражнение
+
+
+    Схема БД состоит из четырех таблиц :
+
+Product(maker, model, type)
+PC(code, model, speed, ram, hd, cd, price)
+Laptop(code, model, speed, ram, hd, screen, price)
+Printer(code, model, color, type, price)
+Таблица Product представляет производителя (maker), номер модели (model) и тип (PC — ПК, Laptop — портативный компьютер или Printer — принтер).
+Предполагается, что в этой таблице номера моделей уникальны для всех производителей и типов продуктов.
+
+В таблице PC для каждого номера модели, обозначающего ПК, указаны скорость процессора — speed (МГерц),
+общий объем оперативной памяти - ram (Мбайт), размер диска — hd (в Гбайт), скорость считывающего устройства - cd (например, '4х') и цена — price.
+
+Таблица Laptop аналогична таблице РС за исключением того, что вместо скорости CD-привода содержит размер экрана — screen (в дюймах).
+
+В таблице Printer для каждой модели принтера указывается, является ли он цветным — color ('y', если цветной),
+тип принтера — type (лазерный — Laser, струйный — Jet или матричный — Matrix)
+и цена — price.
++ */
+
+import java.sql.*;
+import java.util.Random;
+import java.util.Scanner;
+
+public class IronBenchDb {
+
+    private static final String DB_CONNECTION = "jdbc:postgresql://localhost:5432/IronBench";
+    private static final String DB_USER = "postgres";
+    private static final String DB_PASSWORD = "postgres";
+
+    private static Connection connection;
+    private static Scanner sc;
+
+    public static void main(String[] args) {
+
+        sc = new Scanner(System.in);
+
+        try (Connection conn = DriverManager.getConnection
+                (DB_CONNECTION, DB_USER, DB_PASSWORD)) {
+            connection = conn;
+            initProductDB(); // Product(maker, model, type)
+            initPCDB(); // PC(code, model, speed, ram, hd, cd, price)
+            initLaptopDB();// Laptop(code, model, speed, ram, hd, screen, price)
+            initPrinterDB(); //Printer(code, model, color, type, price)
+
+          /* while (true) {
+                showMenu();
+                showMenuOrders();// метод - создание мню в консоли
+                showMenuDetails();
+                String s = sc.nextLine();
+                switch (s) {
+                    case "1":
+                        addProduct();
+                        break;
+                    case "2":
+                        insertRandomProduct();
+                        break;
+                    case "3":
+                        addPC();
+                        break;
+                    case "4":
+                        insertRandomPC();
+                        break;
+                    case "5":
+                        addLaptop();
+                        break;
+                    case "6":
+                        insertRandomLaptop();
+                        break;
+                    case "7":
+                        addPrinter();
+                        break;
+                    case "8":
+                        insertRandomPrinter();
+                        break;
+                    case "1.5.":
+                        viewClients();
+                        break;
+                    case "1.6.":
+                        viewClientsByAge();
+                        break;
+                    case "1.7.":
+                        viewClientsByName();
+                        break;
+                    default:
+                        return;
+                }
+            }*/
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void initProductDB() throws SQLException {
+        // Product(maker, model, type)
+        Statement st = connection.createStatement();
+        try {
+            st.execute("DROP TABLE IF EXISTS    Product");
+
+            st.execute("CREATE TABLE Product (" +
+                    "id SERIAL NOT NULL PRIMARY KEY, " +
+                    "maker VARCHAR (10) NOT NULL," +
+                    "model VARCHAR (50) NOT NULL," +
+                    "type1 VARCHAR (50) NOT NULL,) ");
+        }finally {
+            st.close();
+        }
+    }
+
+    private static void initPCDB() throws SQLException {
+        // PC(code, model, speed, ram, hd, cd, price)
+        Statement st = connection.createStatement();
+        try{
+            st.execute("DROP  TABLE IF EXISTS PC");
+
+            st.execute("GRANT TABLE PC (" +
+                    "id SERIAL NOT NULL PRIMARY KEY, " +
+                    "code INT," +
+                    "model VARCHAR (50)," +
+                    "speed SMALLINT ," +
+                    "ram SMALLINT ," +
+                    "hd REAL ," +
+                    "cd VARCHAR (10)," +
+                    "price MONEY)");
+        }finally {
+            st.close();
+
+        }
+    }
+
+    private static void initLaptopDB() throws SQLException{
+        // Laptop(code, model, speed, ram, hd, screen, price)
+        Statement st = connection.createStatement();
+        try {
+            st.execute("DROP TABLE IF Laptop");
+            st.execute("GRANT TABLE Laptop (" +
+                    "id SERIAL NOT NULL PRIMARY KEY, " +
+                    "code INT," +
+                    "model VARCHAR (50)," +
+                    "speed SMALINT ," +
+                    "ram SMALINT ," +
+                    "hd REAL ," +
+                    "screen TINYITT," +
+                    "price MONEY)");
+        } finally {
+            st.close();
+        }
+    }
+    private static void initPrinterDB() throws SQLException{
+        //Printer(code, model, color, type, price)
+        Statement st = connection.createStatement();
+        try {
+            st.execute("DROP TABLE IF Printer (" +
+                    "id SERIAL NOT NULL PRIMARY KEY, " +
+                    "code INT," +
+                    "model VARCHAR (50)," +
+                    "color CHAR (1)," +
+                    "type VARCHAR (10)," +
+                    "price MONEY)");
+        }finally {
+            st.close();
+        }
+    }
+
+
+
+
+    private static void initClientsDB() throws SQLException {
+        Statement st = connection.createStatement();
+        try {
+            st.execute("DROP TABLE IF EXISTS Clients");
+
+            st.execute("CREATE TABLE Clients (" +
+                    "id SERIAL NOT NULL PRIMARY KEY, " +
+                    "name VARCHAR(20) NOT NULL, age INT)");
+        } finally {
+            st.close();
+        }
+    }
+
+    private static void initOrdersDB() throws SQLException {
+        Statement st = connection.createStatement();
+        try {
+            st.execute("DROP TABLE IF EXISTS Orders");
+            st.execute("CREATE TABLE Orders(" +
+                    "id SERIAL NOT NULL PRIMARY KEY," +
+                    "title VARCHAR (50) NOT NULL )");
+        } finally {
+            st.close();
+        }
+    }
+
+    private static void initDetailsDB() throws SQLException {
+        Statement st = connection.createStatement();
+        try {
+            st.execute("DROP TABLE IF EXISTS Details");
+            st.execute("CREATE TABLE Details(id SERIAL NOT NULL PRIMARY KEY," +
+                    "idClient INT NOT NULL, " +
+                    "address VARCHAR (50) NOT NULL )");
+        } finally {
+            st.close();
+        }
+    }
+
+    private static void showMenuClients() {
+        System.out.println("1.1. add client");
+        System.out.println("1.2. add random client");
+        System.out.println("1.3. delete client");
+        System.out.println("1.4. change client");
+        System.out.println("1.5. view clients");
+        System.out.println("1.6. view clients by age");
+        System.out.println("1.7. view clients by part of name");
+        System.out.println("------------------------------------ ");
+    }
+
+    private static void showMenuOrders() {
+        System.out.println("2.1. add orders");
+        System.out.println("2.2. add random orders");
+        System.out.println("2.3. delete orders");
+        System.out.println("2.4. view orders");
+        System.out.println("2.5. view orders by part of title");
+        System.out.println("------------------------------------ ");
+    }
+
+    private static void showMenuDetails() {
+        System.out.println("3.1. add details by id client: ");
+        System.out.println("3.2. delete details by id client: ");
+        System.out.println("3.3. view details clients: ");
+        System.out.println("3.4. view details by id client: ");
+    }
+
+    private static void addClient() throws SQLException {
+        System.out.println("Enter client name: ");
+        String name = sc.nextLine();
+        System.out.println("Enter client age: ");
+        String sAge = sc.nextLine();
+        int age = Integer.parseInt(sAge);
+
+        try (PreparedStatement ps = connection.prepareStatement("INSERT INTO " +
+                "Clients (name,age) VALUES (?,?)")) {
+            ps.setString(1, name);
+            ps.setInt(2, age);
+            ps.executeUpdate();  // ------- for INSERT, UPDATE & DELETE
+        }
+    }
+
+    private static void insertRandomClient() throws SQLException {
+        System.out.println("Enter clients count: ");
+        String sCount = sc.nextLine();
+        int count = Integer.parseInt(sCount);
+        Random rnd = new Random();
+
+        connection.setAutoCommit(false);// ------------enable transactions
+        try {
+            try (PreparedStatement ps = connection.prepareStatement("INSERT INTO Clients (name, age) VALUES (?,?)")) {
+                for (int i = 0; i <= count; i++) {
+                    ps.setString(1, "Name" + i);
+                    ps.setInt(2, rnd.nextInt(50));
+                    ps.executeUpdate();
+                }
+                connection.commit();
+            } catch (Exception ex) {
+                connection.rollback();
+            }
+        } finally {
+            connection.setAutoCommit(true); // ---------return to default mode
+        }
+    }
+
+    private static void deleteClient() throws SQLException {
+        System.out.println("Enter client ID: ");
+        String sId = sc.nextLine();
+        int id = Integer.parseInt(sId);
+
+        try (PreparedStatement ps = connection.prepareStatement
+                ("DELETE FROM Clients WHERE id= " + id)) {
+            ps.executeUpdate();
+        }
+    }
+
+    private static void changeClient() throws SQLException {
+        System.out.println("Enter clients name: ");
+        String name = sc.nextLine();
+
+        System.out.println("Enter new age: ");
+        String sAge = sc.nextLine();
+        int age = Integer.parseInt(sAge);
+
+        try (PreparedStatement ps = connection.prepareStatement
+                ("UPDATE Cliens SET age = ? WHERE  name=?")) {
+            ps.setInt(1, age);
+            ps.setString(2, name);
+            ps.executeUpdate();
+        }
+
+    }
+
+    private static void viewClients() throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Clients")) {
+            try (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
+        }
+    }
+
+
+    private static void viewClientsByAge() throws SQLException {
+        System.out.println("Enter min age: ");
+        String sAge = sc.nextLine();
+        int age = Integer.parseInt(sAge);
+
+        try (Statement s = connection.createStatement()) {
+            try (ResultSet rs = s.executeQuery("SELECT *FROM Clients WHERE age>" + age)) {
+                printResultSet(rs);
+            }
+        }
+    }
+
+    private static void viewClientsByName() throws SQLException {
+        System.out.println("Enter part of name: ");
+        String namePart = sc.nextLine();
+        try (PreparedStatement ps = connection.prepareStatement
+                ("SELECT * FROM Clients WHERE name like CONCAT" +
+                        "('%', ?, '%')")) {
+            ps.setString(1, namePart);
+            try (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
+        }
+    }
+
+    private static void addOrders() throws SQLException {
+        System.out.println("Enter order title: ");
+        String title = sc.nextLine();
+
+        try (PreparedStatement ps = connection.prepareStatement("INSERT INTO Orders(title) VALUES (?)")) {
+            ps.setString(1, title);
+            ps.executeUpdate();
+        }
+    }
+
+    private static void insertAutoOrders() throws SQLException {
+        System.out.println("Enter orders count: ");
+        String sCount = sc.nextLine();
+        int count = Integer.parseInt(sCount);
+
+        connection.setAutoCommit(false);
+        try {
+            try (PreparedStatement ps = connection.prepareStatement("INSERT INTO Orders (title) VALUES (?)")) {
+
+                for (int i = 0; i <= count; i++) {
+                    ps.setString(1, "Title" + (i + 1));
+                    ps.executeUpdate();
+                }
+                connection.commit();
+            } catch (Exception ex) {
+                connection.rollback();
+            }
+        } finally {
+            connection.setAutoCommit(true);
+        }
+    }
+
+    private static void deleteOrders() throws SQLException {
+        System.out.println("Enter orders id: ");
+        String sId = sc.nextLine();
+        int id = Integer.parseInt(sId);
+
+        try (PreparedStatement ps = connection.prepareStatement("DELETE FROM Orders WHERE id=" + id)) {
+            ps.executeUpdate();
+        }
+    }
+
+    private static void viewOrders() throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT *FROM Orders")) {
+            try (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
+        }
+    }
+
+    private static void viewOrdersByTitle() throws SQLException {
+        System.out.println("Enter part of title: ");
+        String titilePart = sc.nextLine();
+        try (PreparedStatement ps = connection.prepareStatement("SELECT *FROM Orders WHERE title like CONCAT " +
+                "('%',?,'%')")) {
+            ps.setString(1, titilePart);
+            try (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
+        }
+    }
+
+    private static void addDetails() throws SQLException {
+        System.out.println("Enter id client: ");
+        String sIdClient = sc.nextLine();
+        int idClient = Integer.parseInt(sIdClient);
+
+        System.out.println("Enter address client: ");
+        String address = sc.nextLine();
+
+        try (PreparedStatement ps = connection.prepareStatement(
+                "INSERT INTO Details(idClient,address)" +
+                        "VALUES (?,?)")) {
+            ps.setInt(1, idClient);
+            ps.setString(2, address);
+            ps.executeUpdate();
+        }
+    }
+
+    private static void deleteDetails() throws SQLException {
+        System.out.println("Enter id client for delete details: ");
+        String sIdClient = sc.nextLine();
+        int idClient = Integer.parseInt(sIdClient);
+
+        try (PreparedStatement ps = connection.prepareStatement("" +
+                "DELETE  FROM Details WHERE idClient =" + idClient)) {
+            ps.executeUpdate();
+        }
+    }
+
+    private static void viewDetails() throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT *FROM Details")) {
+            try (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
+        }
+    }
+
+    private static void viewDetailsByIdClient() {
+
+    }
+
+
+    private static void printResultSet(ResultSet rs) throws SQLException {
+        ResultSetMetaData md = rs.getMetaData();
+
+        for (int i = 1; i <= md.getColumnCount(); i++) {
+            System.out.print(md.getColumnName(i) + "\t\t");
+        }
+        System.out.println();
+
+        while (rs.next()) {
+            for (int i = 1; i <= md.getColumnCount(); i++) {
+                System.out.print(rs.getString(i) + "\t\t");
+            }
+            System.out.println();
+        }
+    }
+}
