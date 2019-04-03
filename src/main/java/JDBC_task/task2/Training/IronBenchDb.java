@@ -50,10 +50,8 @@ public class IronBenchDb {
             initLaptopDB();// Laptop(code, model, speed, ram, hd, screen, price)
             initPrinterDB(); //Printer(code, model, color, type, price)
 
-          /* while (true) {
+           while (true) {
                 showMenu();
-                showMenuOrders();// метод - создание мню в консоли
-                showMenuDetails();
                 String s = sc.nextLine();
                 switch (s) {
                     case "1":
@@ -80,23 +78,17 @@ public class IronBenchDb {
                     case "8":
                         insertRandomPrinter();
                         break;
-                    case "1.5.":
-                        viewClients();
-                        break;
-                    case "1.6.":
-                        viewClientsByAge();
-                        break;
-                    case "1.7.":
-                        viewClientsByName();
-                        break;
+
                     default:
                         return;
                 }
-            }*/
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
+
 
     private static void initProductDB() throws SQLException {
         // Product(maker, model, type)
@@ -108,7 +100,7 @@ public class IronBenchDb {
                     "id SERIAL NOT NULL PRIMARY KEY, " +
                     "maker VARCHAR (10) NOT NULL," +
                     "model VARCHAR (50) NOT NULL," +
-                    "type1 VARCHAR (50) NOT NULL,) ");
+                    "type VARCHAR (50) NOT NULL) ");
         }finally {
             st.close();
         }
@@ -120,35 +112,36 @@ public class IronBenchDb {
         try{
             st.execute("DROP  TABLE IF EXISTS PC");
 
-            st.execute("GRANT TABLE PC (" +
+            st.execute("CREATE TABLE PC (" +
                     "id SERIAL NOT NULL PRIMARY KEY, " +
                     "code INT," +
                     "model VARCHAR (50)," +
-                    "speed SMALLINT ," +
-                    "ram SMALLINT ," +
-                    "hd REAL ," +
+                    "speed INT ," +
+                    "ram INT ," +
+                    "hd INT ," +
                     "cd VARCHAR (10)," +
-                    "price MONEY)");
+                    "price INT)");
         }finally {
             st.close();
 
         }
     }
 
-    private static void initLaptopDB() throws SQLException{
+    private static void initLaptopDB() throws SQLException {
         // Laptop(code, model, speed, ram, hd, screen, price)
         Statement st = connection.createStatement();
         try {
-            st.execute("DROP TABLE IF Laptop");
-            st.execute("GRANT TABLE Laptop (" +
+            st.execute("DROP TABLE IF EXISTS Laptop");
+            st.execute("CREATE TABLE Laptop (" +
                     "id SERIAL NOT NULL PRIMARY KEY, " +
                     "code INT," +
                     "model VARCHAR (50)," +
-                    "speed SMALINT ," +
-                    "ram SMALINT ," +
-                    "hd REAL ," +
-                    "screen TINYITT," +
-                    "price MONEY)");
+                    "speed INT ," +
+                    "ram INT ," +
+                    "hd INT ," +
+                    "price INT," +
+                    "screen INT " +
+                    ")");
         } finally {
             st.close();
         }
@@ -157,7 +150,8 @@ public class IronBenchDb {
         //Printer(code, model, color, type, price)
         Statement st = connection.createStatement();
         try {
-            st.execute("DROP TABLE IF Printer (" +
+            st.execute("DROP TABLE IF EXISTS Printer");
+            st.execute("CREATE TABLE Printer (" +
                     "id SERIAL NOT NULL PRIMARY KEY, " +
                     "code INT," +
                     "model VARCHAR (50)," +
@@ -168,73 +162,171 @@ public class IronBenchDb {
             st.close();
         }
     }
-
-
-
-
-    private static void initClientsDB() throws SQLException {
-        Statement st = connection.createStatement();
-        try {
-            st.execute("DROP TABLE IF EXISTS Clients");
-
-            st.execute("CREATE TABLE Clients (" +
-                    "id SERIAL NOT NULL PRIMARY KEY, " +
-                    "name VARCHAR(20) NOT NULL, age INT)");
-        } finally {
-            st.close();
-        }
-    }
-
-    private static void initOrdersDB() throws SQLException {
-        Statement st = connection.createStatement();
-        try {
-            st.execute("DROP TABLE IF EXISTS Orders");
-            st.execute("CREATE TABLE Orders(" +
-                    "id SERIAL NOT NULL PRIMARY KEY," +
-                    "title VARCHAR (50) NOT NULL )");
-        } finally {
-            st.close();
-        }
-    }
-
-    private static void initDetailsDB() throws SQLException {
-        Statement st = connection.createStatement();
-        try {
-            st.execute("DROP TABLE IF EXISTS Details");
-            st.execute("CREATE TABLE Details(id SERIAL NOT NULL PRIMARY KEY," +
-                    "idClient INT NOT NULL, " +
-                    "address VARCHAR (50) NOT NULL )");
-        } finally {
-            st.close();
-        }
-    }
-
-    private static void showMenuClients() {
-        System.out.println("1.1. add client");
-        System.out.println("1.2. add random client");
-        System.out.println("1.3. delete client");
-        System.out.println("1.4. change client");
-        System.out.println("1.5. view clients");
-        System.out.println("1.6. view clients by age");
-        System.out.println("1.7. view clients by part of name");
+    private static void showMenu() {
+        System.out.println("1. add Product");
+        System.out.println("2. add random Product");
+        System.out.println("3. add PC");
+        System.out.println("4. add random PC");
+        System.out.println("5. add Laptop");
+        System.out.println("6. add random Laptop");
+        System.out.println("7. add Printer");
+        System.out.println("8. add random Printer");
         System.out.println("------------------------------------ ");
     }
 
-    private static void showMenuOrders() {
-        System.out.println("2.1. add orders");
-        System.out.println("2.2. add random orders");
-        System.out.println("2.3. delete orders");
-        System.out.println("2.4. view orders");
-        System.out.println("2.5. view orders by part of title");
-        System.out.println("------------------------------------ ");
+
+    private static void addProduct()throws SQLException{
+        System.out.println("Enter product maker: ");
+        String maker = sc.nextLine();
+        System.out.println("Enter product model: ");
+        String model = sc.nextLine();
+        System.out.println("Enter product type: ");
+        String type = sc.nextLine();
+
+        try( PreparedStatement ps= connection.prepareStatement("INSERT INTO" +
+                " Product(maker,model,type) VALUES(?,?,?) ")){
+            ps.setString(1,maker);
+            ps.setString(2,model);
+            ps.setString(3,type);
+            ps.executeUpdate();
+        }
+
     }
 
-    private static void showMenuDetails() {
-        System.out.println("3.1. add details by id client: ");
-        System.out.println("3.2. delete details by id client: ");
-        System.out.println("3.3. view details clients: ");
-        System.out.println("3.4. view details by id client: ");
+    private static void insertRandomProduct() throws SQLException{
+
     }
+
+    private static void addPC() throws SQLException{
+        System.out.println("Enter PC code: ");
+        String sCode = sc.nextLine();
+        int code = Integer.parseInt(sCode);
+
+        System.out.println("Enter PC model: ");
+        String model = sc.nextLine();
+
+        System.out.println("Enter PC speed: ");
+        String sSpeed = sc.nextLine();
+        int speed = Integer.parseInt(sSpeed);
+
+        System.out.println("Enter PC ram:");
+        String sRam = sc.nextLine();
+        int ram = Integer.parseInt(sRam);
+
+        System.out.println("Enter PC hd:");
+        String sHd = sc.nextLine();
+        int hd = Integer.parseInt(sHd);
+
+        System.out.println("Enter PC cd:");
+        String cd = sc.nextLine();
+
+        System.out.println("Enter PC price:");
+        String sPrice = sc.nextLine();
+        int price = Integer.parseInt(sPrice);
+
+        try(PreparedStatement ps = connection.prepareStatement("INSERT INTO " +
+                "PC (code,model,speed,ram,hd,cd,price) VALUES (?,?,?,?,?,?,?)")){
+            ps.setInt(1,code);
+            ps.setString(2,model);
+            ps.setInt(3,speed);
+            ps.setInt(4,ram);
+            ps.setInt(5,hd);
+            ps.setString(6,cd);
+            ps.setInt(7,price);
+
+            ps.executeUpdate();
+        }
+    }
+
+    private static void insertRandomPC() throws SQLException{
+
+    }
+
+    private static void addLaptop() throws SQLException{
+        System.out.println("Enter Laptop code: ");
+        String sCode = sc.nextLine();
+        int code = Integer.parseInt(sCode);
+
+        System.out.println("Enter Laptop model: ");
+        String model = sc.nextLine();
+
+        System.out.println("Enter Laptop speed: ");
+        String sSpeed = sc.nextLine();
+        int speed = Integer.parseInt(sSpeed);
+
+        System.out.println("Enter Laptop ram:");
+        String sRam = sc.nextLine();
+        int ram = Integer.parseInt(sRam);
+
+        System.out.println("Enter Laptop hd:");
+        String sHd = sc.nextLine();
+        int hd = Integer.parseInt(sHd);
+
+        System.out.println("Enter Laptop price:");
+        String sPrice = sc.nextLine();
+        int price = Integer.parseInt(sPrice);
+
+        System.out.println("Enter Laptop screen:");
+        String sScreen = sc.nextLine();
+        int screen = Integer.parseInt(sScreen);
+
+
+        try(PreparedStatement ps = connection.prepareStatement("INSERT INTO " +
+                "Laptop (code,model,speed,ram,hd,price,screen) VALUES (?,?,?,?,?,?,?)")){
+            ps.setInt(1,code);
+            ps.setString(2,model);
+            ps.setInt(3,speed);
+            ps.setInt(4,ram);
+            ps.setInt(5,hd);
+            ps.setInt(6,price);
+            ps.setInt(7,screen);
+
+            ps.executeUpdate();
+        }
+
+    }
+
+    private static void insertRandomLaptop() throws SQLException{
+    }
+
+    private static void addPrinter() throws SQLException{
+        System.out.println("Enter Printer code: ");
+        String sCode = sc.nextLine();
+        int code = Integer.parseInt(sCode);
+
+        System.out.println("Enter Printer model: ");
+        String model = sc.nextLine();
+
+        System.out.println("Enter Printer color: ");
+        String color= sc.nextLine();
+
+        System.out.println("Enter Printer type:");
+        String type = sc.nextLine();
+
+        System.out.println("Enter Printer price:");
+        String sPrice = sc.nextLine();
+        int price = Integer.parseInt(sPrice);
+
+
+
+
+        try(PreparedStatement ps = connection.prepareStatement("INSERT INTO " +
+                "Printer (code,model,color,type,price) VALUES (?,?,?,?,?)")){
+            ps.setInt(1,code);
+            ps.setString(2,model);
+            ps.setString(3,color);
+            ps.setString(4,type);
+            ps.setInt(5,price);
+
+
+            ps.executeUpdate();
+        }
+
+    }
+
+    private static void insertRandomPrinter() throws SQLException{
+    }
+
 
     private static void addClient() throws SQLException {
         System.out.println("Enter client name: ");
