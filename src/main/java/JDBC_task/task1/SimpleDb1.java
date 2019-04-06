@@ -144,7 +144,8 @@ public class SimpleDb1 {
         String sId = sc.nextLine();
         int id = Integer.parseInt(sId);
 
-        try (PreparedStatement ps = connection.prepareStatement("DELETE FROM Clients WHERE id = " + id)) {
+        try (PreparedStatement ps = connection.prepareStatement
+                ("DELETE FROM Clients WHERE id = " + id)) {
             ps.executeUpdate(); // for INSERT, UPDATE & DELETE
         }
     }
@@ -156,7 +157,8 @@ public class SimpleDb1 {
         String sAge = sc.nextLine();
         int age = Integer.parseInt(sAge);
 
-        try (PreparedStatement ps = connection.prepareStatement("UPDATE Clients SET age = ? WHERE name = ?")) {
+        try (PreparedStatement ps = connection.prepareStatement
+                ("UPDATE Clients SET age = ? WHERE name = ?")) {
             ps.setInt(1, age);
             ps.setString(2, name);
             ps.executeUpdate(); // for INSERT, UPDATE & DELETE
@@ -177,7 +179,7 @@ public class SimpleDb1 {
         String sAge = sc.nextLine();
         int age = Integer.parseInt(sAge);
 
-        try (Statement s = connection.createStatement()) {      //тут используем обычный Statement
+        try (Statement s = connection.createStatement()) {//тут используем обычный Statement
             // table of data representing a database result set,
             try (ResultSet rs = s.executeQuery("SELECT * FROM Clients WHERE age > " + age)) {
                 printResultSet(rs);
@@ -191,7 +193,9 @@ public class SimpleDb1 {
 
         //тут используем PreparedStatement
         try (PreparedStatement ps =
-                     connection.prepareStatement("SELECT * FROM Clients WHERE name like CONCAT('%', ?, '%')")) {
+                     connection.prepareStatement
+                             ("SELECT * FROM Clients WHERE name like CONCAT" +
+                                     "('%', ?, '%')")) {
             ps.setString(1, namePart);
             // table of data representing a database result set,
             try (ResultSet rs = ps.executeQuery()) {
