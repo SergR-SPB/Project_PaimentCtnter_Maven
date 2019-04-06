@@ -45,39 +45,36 @@ public class IronBenchDb {
         try (Connection conn = DriverManager.getConnection
                 (DB_CONNECTION, DB_USER, DB_PASSWORD)) {
             connection = conn;
-            initProductDB(); // Product(maker, model, type)
-            initPCDB(); // PC(code, model, speed, ram, hd, cd, price)
-            initLaptopDB();// Laptop(code, model, speed, ram, hd, screen, price)
-            initPrinterDB(); //Printer(code, model, color, type, price)
 
-           while (true) {
+//            DB созданы наполнены - не создавать новые
+//            initProductDB(); // Product(maker, model, type)
+//            initPCDB(); // PC(code, model, speed, ram, hd, cd, price)
+//            initLaptopDB();// Laptop(code, model, speed, ram, hd, screen, price)
+//            initPrinterDB(); //Printer(code, model, color, type, price)
+
+            while (true) {
                 showMenu();
                 String s = sc.nextLine();
                 switch (s) {
                     case "1":
                         addProduct();
                         break;
+
                     case "2":
-                        insertRandomProduct();
-                        break;
+                        viewProduct();
+
                     case "3":
                         addPC();
                         break;
-                    case "4":
-                        insertRandomPC();
-                        break;
+
                     case "5":
                         addLaptop();
                         break;
-                    case "6":
-                        insertRandomLaptop();
-                        break;
+
                     case "7":
                         addPrinter();
                         break;
-                    case "8":
-                        insertRandomPrinter();
-                        break;
+
 
                     default:
                         return;
@@ -87,7 +84,6 @@ public class IronBenchDb {
             e.printStackTrace();
         }
     }
-
 
 
     private static void initProductDB() throws SQLException {
@@ -101,7 +97,7 @@ public class IronBenchDb {
                     "maker VARCHAR (10) NOT NULL," +
                     "model VARCHAR (50) NOT NULL," +
                     "type VARCHAR (50) NOT NULL) ");
-        }finally {
+        } finally {
             st.close();
         }
     }
@@ -109,7 +105,7 @@ public class IronBenchDb {
     private static void initPCDB() throws SQLException {
         // PC(code, model, speed, ram, hd, cd, price)
         Statement st = connection.createStatement();
-        try{
+        try {
             st.execute("DROP  TABLE IF EXISTS PC");
 
             st.execute("CREATE TABLE PC (" +
@@ -121,7 +117,7 @@ public class IronBenchDb {
                     "hd INT ," +
                     "cd VARCHAR (10)," +
                     "price INT)");
-        }finally {
+        } finally {
             st.close();
 
         }
@@ -146,11 +142,12 @@ public class IronBenchDb {
             st.close();
         }
     }
-    private static void initPrinterDB() throws SQLException{
+
+    private static void initPrinterDB() throws SQLException {
         //Printer(code, model, color, type, price)
         Statement st = connection.createStatement();
         try {
-            st.execute("DROP TABLE IF EXISTS Printer");
+           st.execute("DROP TABLE IF EXISTS Printer");
             st.execute("CREATE TABLE Printer (" +
                     "id SERIAL NOT NULL PRIMARY KEY, " +
                     "code INT," +
@@ -158,24 +155,22 @@ public class IronBenchDb {
                     "color CHAR (1)," +
                     "type VARCHAR (10)," +
                     "price MONEY)");
-        }finally {
+        } finally {
             st.close();
         }
     }
+
     private static void showMenu() {
         System.out.println("1. add Product");
-        System.out.println("2. add random Product");
+        System.out.println("2. view Product");
         System.out.println("3. add PC");
-        System.out.println("4. add random PC");
         System.out.println("5. add Laptop");
-        System.out.println("6. add random Laptop");
         System.out.println("7. add Printer");
-        System.out.println("8. add random Printer");
         System.out.println("------------------------------------ ");
     }
 
 
-    private static void addProduct()throws SQLException{
+    private static void addProduct() throws SQLException {
         System.out.println("Enter product maker: ");
         String maker = sc.nextLine();
         System.out.println("Enter product model: ");
@@ -183,21 +178,17 @@ public class IronBenchDb {
         System.out.println("Enter product type: ");
         String type = sc.nextLine();
 
-        try( PreparedStatement ps= connection.prepareStatement("INSERT INTO" +
-                " Product(maker,model,type) VALUES(?,?,?) ")){
-            ps.setString(1,maker);
-            ps.setString(2,model);
-            ps.setString(3,type);
+        try (PreparedStatement ps = connection.prepareStatement("INSERT INTO" +
+                " Product(maker,model,type) VALUES(?,?,?) ")) {
+            ps.setString(1, maker);
+            ps.setString(2, model);
+            ps.setString(3, type);
             ps.executeUpdate();
         }
 
     }
 
-    private static void insertRandomProduct() throws SQLException{
-
-    }
-
-    private static void addPC() throws SQLException{
+    private static void addPC() throws SQLException {
         System.out.println("Enter PC code: ");
         String sCode = sc.nextLine();
         int code = Integer.parseInt(sCode);
@@ -224,25 +215,21 @@ public class IronBenchDb {
         String sPrice = sc.nextLine();
         int price = Integer.parseInt(sPrice);
 
-        try(PreparedStatement ps = connection.prepareStatement("INSERT INTO " +
-                "PC (code,model,speed,ram,hd,cd,price) VALUES (?,?,?,?,?,?,?)")){
-            ps.setInt(1,code);
-            ps.setString(2,model);
-            ps.setInt(3,speed);
-            ps.setInt(4,ram);
-            ps.setInt(5,hd);
-            ps.setString(6,cd);
-            ps.setInt(7,price);
+        try (PreparedStatement ps = connection.prepareStatement("INSERT INTO " +
+                "PC (code,model,speed,ram,hd,cd,price) VALUES (?,?,?,?,?,?,?)")) {
+            ps.setInt(1, code);
+            ps.setString(2, model);
+            ps.setInt(3, speed);
+            ps.setInt(4, ram);
+            ps.setInt(5, hd);
+            ps.setString(6, cd);
+            ps.setInt(7, price);
 
             ps.executeUpdate();
         }
     }
 
-    private static void insertRandomPC() throws SQLException{
-
-    }
-
-    private static void addLaptop() throws SQLException{
+     private static void addLaptop() throws SQLException {
         System.out.println("Enter Laptop code: ");
         String sCode = sc.nextLine();
         int code = Integer.parseInt(sCode);
@@ -271,25 +258,21 @@ public class IronBenchDb {
         int screen = Integer.parseInt(sScreen);
 
 
-        try(PreparedStatement ps = connection.prepareStatement("INSERT INTO " +
-                "Laptop (code,model,speed,ram,hd,price,screen) VALUES (?,?,?,?,?,?,?)")){
-            ps.setInt(1,code);
-            ps.setString(2,model);
-            ps.setInt(3,speed);
-            ps.setInt(4,ram);
-            ps.setInt(5,hd);
-            ps.setInt(6,price);
-            ps.setInt(7,screen);
+        try (PreparedStatement ps = connection.prepareStatement("INSERT INTO " +
+                "Laptop (code,model,speed,ram,hd,price,screen) VALUES (?,?,?,?,?,?,?)")) {
+            ps.setInt(1, code);
+            ps.setString(2, model);
+            ps.setInt(3, speed);
+            ps.setInt(4, ram);
+            ps.setInt(5, hd);
+            ps.setInt(6, price);
+            ps.setInt(7, screen);
 
             ps.executeUpdate();
         }
-
     }
 
-    private static void insertRandomLaptop() throws SQLException{
-    }
-
-    private static void addPrinter() throws SQLException{
+    private static void addPrinter() throws SQLException {
         System.out.println("Enter Printer code: ");
         String sCode = sc.nextLine();
         int code = Integer.parseInt(sCode);
@@ -298,7 +281,7 @@ public class IronBenchDb {
         String model = sc.nextLine();
 
         System.out.println("Enter Printer color: ");
-        String color= sc.nextLine();
+        String color = sc.nextLine();
 
         System.out.println("Enter Printer type:");
         String type = sc.nextLine();
@@ -308,233 +291,32 @@ public class IronBenchDb {
         int price = Integer.parseInt(sPrice);
 
 
-
-
-        try(PreparedStatement ps = connection.prepareStatement("INSERT INTO " +
-                "Printer (code,model,color,type,price) VALUES (?,?,?,?,?)")){
-            ps.setInt(1,code);
-            ps.setString(2,model);
-            ps.setString(3,color);
-            ps.setString(4,type);
-            ps.setInt(5,price);
-
-
-            ps.executeUpdate();
-        }
-
-    }
-
-    private static void insertRandomPrinter() throws SQLException{
-    }
-
-
-    private static void addClient() throws SQLException {
-        System.out.println("Enter client name: ");
-        String name = sc.nextLine();
-        System.out.println("Enter client age: ");
-        String sAge = sc.nextLine();
-        int age = Integer.parseInt(sAge);
-
         try (PreparedStatement ps = connection.prepareStatement("INSERT INTO " +
-                "Clients (name,age) VALUES (?,?)")) {
-            ps.setString(1, name);
-            ps.setInt(2, age);
-            ps.executeUpdate();  // ------- for INSERT, UPDATE & DELETE
-        }
-    }
+                "Printer (code,model,color,type,price) VALUES (?,?,?,?,?)")) {
+            ps.setInt(1, code);
+            ps.setString(2, model);
+            ps.setString(3, color);
+            ps.setString(4, type);
+            ps.setInt(5, price);
 
-    private static void insertRandomClient() throws SQLException {
-        System.out.println("Enter clients count: ");
-        String sCount = sc.nextLine();
-        int count = Integer.parseInt(sCount);
-        Random rnd = new Random();
 
-        connection.setAutoCommit(false);// ------------enable transactions
-        try {
-            try (PreparedStatement ps = connection.prepareStatement("INSERT INTO Clients (name, age) VALUES (?,?)")) {
-                for (int i = 0; i <= count; i++) {
-                    ps.setString(1, "Name" + i);
-                    ps.setInt(2, rnd.nextInt(50));
-                    ps.executeUpdate();
-                }
-                connection.commit();
-            } catch (Exception ex) {
-                connection.rollback();
-            }
-        } finally {
-            connection.setAutoCommit(true); // ---------return to default mode
-        }
-    }
-
-    private static void deleteClient() throws SQLException {
-        System.out.println("Enter client ID: ");
-        String sId = sc.nextLine();
-        int id = Integer.parseInt(sId);
-
-        try (PreparedStatement ps = connection.prepareStatement
-                ("DELETE FROM Clients WHERE id= " + id)) {
             ps.executeUpdate();
         }
     }
 
-    private static void changeClient() throws SQLException {
-        System.out.println("Enter clients name: ");
-        String name = sc.nextLine();
-
-        System.out.println("Enter new age: ");
-        String sAge = sc.nextLine();
-        int age = Integer.parseInt(sAge);
-
-        try (PreparedStatement ps = connection.prepareStatement
-                ("UPDATE Cliens SET age = ? WHERE  name=?")) {
-            ps.setInt(1, age);
-            ps.setString(2, name);
-            ps.executeUpdate();
-        }
-
-    }
-
-    private static void viewClients() throws SQLException {
-        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Clients")) {
+    private static void viewProduct() throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Product")) {
             try (ResultSet rs = ps.executeQuery()) {
                 printResultSet(rs);
             }
         }
-    }
-
-
-    private static void viewClientsByAge() throws SQLException {
-        System.out.println("Enter min age: ");
-        String sAge = sc.nextLine();
-        int age = Integer.parseInt(sAge);
-
-        try (Statement s = connection.createStatement()) {
-            try (ResultSet rs = s.executeQuery("SELECT *FROM Clients WHERE age>" + age)) {
-                printResultSet(rs);
-            }
-        }
-    }
-
-    private static void viewClientsByName() throws SQLException {
-        System.out.println("Enter part of name: ");
-        String namePart = sc.nextLine();
-        try (PreparedStatement ps = connection.prepareStatement
-                ("SELECT * FROM Clients WHERE name like CONCAT" +
-                        "('%', ?, '%')")) {
-            ps.setString(1, namePart);
-            try (ResultSet rs = ps.executeQuery()) {
-                printResultSet(rs);
-            }
-        }
-    }
-
-    private static void addOrders() throws SQLException {
-        System.out.println("Enter order title: ");
-        String title = sc.nextLine();
-
-        try (PreparedStatement ps = connection.prepareStatement("INSERT INTO Orders(title) VALUES (?)")) {
-            ps.setString(1, title);
-            ps.executeUpdate();
-        }
-    }
-
-    private static void insertAutoOrders() throws SQLException {
-        System.out.println("Enter orders count: ");
-        String sCount = sc.nextLine();
-        int count = Integer.parseInt(sCount);
-
-        connection.setAutoCommit(false);
-        try {
-            try (PreparedStatement ps = connection.prepareStatement("INSERT INTO Orders (title) VALUES (?)")) {
-
-                for (int i = 0; i <= count; i++) {
-                    ps.setString(1, "Title" + (i + 1));
-                    ps.executeUpdate();
-                }
-                connection.commit();
-            } catch (Exception ex) {
-                connection.rollback();
-            }
-        } finally {
-            connection.setAutoCommit(true);
-        }
-    }
-
-    private static void deleteOrders() throws SQLException {
-        System.out.println("Enter orders id: ");
-        String sId = sc.nextLine();
-        int id = Integer.parseInt(sId);
-
-        try (PreparedStatement ps = connection.prepareStatement("DELETE FROM Orders WHERE id=" + id)) {
-            ps.executeUpdate();
-        }
-    }
-
-    private static void viewOrders() throws SQLException {
-        try (PreparedStatement ps = connection.prepareStatement("SELECT *FROM Orders")) {
-            try (ResultSet rs = ps.executeQuery()) {
-                printResultSet(rs);
-            }
-        }
-    }
-
-    private static void viewOrdersByTitle() throws SQLException {
-        System.out.println("Enter part of title: ");
-        String titilePart = sc.nextLine();
-        try (PreparedStatement ps = connection.prepareStatement("SELECT *FROM Orders WHERE title like CONCAT " +
-                "('%',?,'%')")) {
-            ps.setString(1, titilePart);
-            try (ResultSet rs = ps.executeQuery()) {
-                printResultSet(rs);
-            }
-        }
-    }
-
-    private static void addDetails() throws SQLException {
-        System.out.println("Enter id client: ");
-        String sIdClient = sc.nextLine();
-        int idClient = Integer.parseInt(sIdClient);
-
-        System.out.println("Enter address client: ");
-        String address = sc.nextLine();
-
-        try (PreparedStatement ps = connection.prepareStatement(
-                "INSERT INTO Details(idClient,address)" +
-                        "VALUES (?,?)")) {
-            ps.setInt(1, idClient);
-            ps.setString(2, address);
-            ps.executeUpdate();
-        }
-    }
-
-    private static void deleteDetails() throws SQLException {
-        System.out.println("Enter id client for delete details: ");
-        String sIdClient = sc.nextLine();
-        int idClient = Integer.parseInt(sIdClient);
-
-        try (PreparedStatement ps = connection.prepareStatement("" +
-                "DELETE  FROM Details WHERE idClient =" + idClient)) {
-            ps.executeUpdate();
-        }
-    }
-
-    private static void viewDetails() throws SQLException {
-        try (PreparedStatement ps = connection.prepareStatement("SELECT *FROM Details")) {
-            try (ResultSet rs = ps.executeQuery()) {
-                printResultSet(rs);
-            }
-        }
-    }
-
-    private static void viewDetailsByIdClient() {
-
     }
 
 
     private static void printResultSet(ResultSet rs) throws SQLException {
         ResultSetMetaData md = rs.getMetaData();
 
-        for (int i = 1; i <= md.getColumnCount(); i++) {
+        for (int i = 1; i <=md.getColumnCount(); i++) {
             System.out.print(md.getColumnName(i) + "\t\t");
         }
         System.out.println();
