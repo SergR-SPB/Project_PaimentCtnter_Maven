@@ -56,25 +56,41 @@ public class IronBenchDb {
                 showMenu();
                 String s = sc.nextLine();
                 switch (s) {
+                    case "01":
+                        viewPCPrice();
+                        break;
+
                     case "1":
                         addProduct();
                         break;
 
                     case "2":
                         viewProduct();
+                        break;
 
                     case "3":
                         addPC();
+                        break;
+
+                    case "4":
+                        viewPC();
                         break;
 
                     case "5":
                         addLaptop();
                         break;
 
+                    case "6":
+                        viewLaptop();
+                        break;
+
                     case "7":
                         addPrinter();
                         break;
 
+                    case "8":
+                        viewPrinter();
+                        break;
 
                     default:
                         return;
@@ -82,6 +98,20 @@ public class IronBenchDb {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    // Найдите номер модели, скорость и размер жесткого диска для всех ПК
+// стоимостью менее 500 долларов. Вывести: model, speed и hd
+    private static void viewPCPrice() throws SQLException {
+
+        try (PreparedStatement ps = connection.prepareStatement
+                ("SELECT model, speed, hd FROM PC WHERE price < 500")
+                //("SELECT Product.model, PC.speed, PC.hd FROM Product, PC WHERE Product.model = PC.model AND price < 500 ")
+        ) {
+            try (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
         }
     }
 
@@ -147,7 +177,7 @@ public class IronBenchDb {
         //Printer(code, model, color, type, price)
         Statement st = connection.createStatement();
         try {
-           st.execute("DROP TABLE IF EXISTS Printer");
+            st.execute("DROP TABLE IF EXISTS Printer");
             st.execute("CREATE TABLE Printer (" +
                     "id SERIAL NOT NULL PRIMARY KEY, " +
                     "code INT," +
@@ -161,11 +191,15 @@ public class IronBenchDb {
     }
 
     private static void showMenu() {
+        System.out.println("01. view PC Price: Output: model, speed and hd < 500 $");
         System.out.println("1. add Product");
         System.out.println("2. view Product");
         System.out.println("3. add PC");
+        System.out.println("4. view PC");
         System.out.println("5. add Laptop");
+        System.out.println("6. view Laptop");
         System.out.println("7. add Printer");
+        System.out.println("8. view Printer");
         System.out.println("------------------------------------ ");
     }
 
@@ -229,7 +263,7 @@ public class IronBenchDb {
         }
     }
 
-     private static void addLaptop() throws SQLException {
+    private static void addLaptop() throws SQLException {
         System.out.println("Enter Laptop code: ");
         String sCode = sc.nextLine();
         int code = Integer.parseInt(sCode);
@@ -305,7 +339,32 @@ public class IronBenchDb {
     }
 
     private static void viewProduct() throws SQLException {
-        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Product")) {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT *FROM PC")) {
+            try (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
+        }
+    }
+
+    private static void viewPC() throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT *FROM PC")) {
+            try (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
+        }
+    }
+
+
+    private static void viewLaptop() throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT *FROM PC")) {
+            try (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
+        }
+    }
+
+    private static void viewPrinter() throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT *FROM PC")) {
             try (ResultSet rs = ps.executeQuery()) {
                 printResultSet(rs);
             }
@@ -316,7 +375,7 @@ public class IronBenchDb {
     private static void printResultSet(ResultSet rs) throws SQLException {
         ResultSetMetaData md = rs.getMetaData();
 
-        for (int i = 1; i <=md.getColumnCount(); i++) {
+        for (int i = 1; i <= md.getColumnCount(); i++) {
             System.out.print(md.getColumnName(i) + "\t\t");
         }
         System.out.println();
