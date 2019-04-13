@@ -54,10 +54,27 @@ public class IronBenchDb {
 
             while (true) {
                 showMenu();
+                showMenuSelect();
                 String s = sc.nextLine();
                 switch (s) {
                     case "01":
                         viewPCPrice();
+                        break;
+
+                    case "02":
+                        viewPrinterMaker();
+                        break;
+
+                    case "03":
+                        viewLaptopPrice();
+                        break;
+
+                    case "04":
+                        viewPCPriceEndCD();
+                        break;
+
+                    case "05":
+                        viewLaptop10hd();
                         break;
 
                     case "1":
@@ -101,19 +118,104 @@ public class IronBenchDb {
         }
     }
 
-    // Найдите номер модели, скорость и размер жесткого диска для всех ПК
-// стоимостью менее 500 долларов. Вывести: model, speed и hd
+    /* 01. Найдите номер модели, скорость и размер жесткого диска для всех ПК
+          стоимостью менее 500 долларов. Вывести: model, speed и hd*/
+
     private static void viewPCPrice() throws SQLException {
 
         try (PreparedStatement ps = connection.prepareStatement
-                ("SELECT model, speed, hd FROM PC WHERE price < 500")
-                //("SELECT Product.model, PC.speed, PC.hd FROM Product, PC WHERE Product.model = PC.model AND price < 500 ")
+
+                //Выборка из таблицы PC:
+                        ("SELECT model, speed, hd, price FROM PC WHERE price < 500")
+
+             //Выборка из таблиц Product & PC:
+             //("SELECT Product.model, PC.speed, PC.hd, PC.price    FROM Product, PC WHERE Product.model = PC.model AND price < 500 ")
         ) {
             try (ResultSet rs = ps.executeQuery()) {
                 printResultSet(rs);
             }
         }
     }
+
+    /*02. Найдите производителей принтеров. Вывести: maker.*/
+    private static void viewPrinterMaker() throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement
+                /*для каждой строки из таблицы Product проверяется, есть ли такая модель в таблице Printer.
+                Связь между этими таблицами (один-ко-многим) допускает наличие модели в таблице Product,
+                которая отсутствовала бы в таблице Printer.  */
+
+                       //("SELECT DISTINCT  maker FROM Product WHERE model IN (SELECT  model FROM Printer)");
+                                   /*ВЫБРАТЬ ОТДЕЛЬНО(без повторений) maker (производитель) ИЗ Product (продукт),  ГДЕ model(модель) в (выберите модель из принтера)*/
+
+                        ("SELECT DISTINCT   maker FROM Product WHERE type = 'Printer'")
+        ) {
+            try
+                    (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
+        }
+    }
+    /*03. Найдите номер модели, объем памяти и размеры экранов портативных компьютеров, цена которых превышает 1000 долларов.*/
+    private static void viewLaptopPrice() throws SQLException {
+       try( PreparedStatement ps = connection.prepareStatement("SELECT model, speed, ram, hd, screen, price FROM Laptop WHERE  price>1000")){
+           try (ResultSet rs = ps.executeQuery()){
+               printResultSet(rs);
+           }
+       }
+    }
+
+    /*04. Найдите номер модели, скорость и размер жесткого диска ПК, имеющих 12х или 24х CD и цену менее 600 долларов.*/
+    private static void viewPCPriceEndCD() throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement
+
+                /* ("SELECT model, speed, ram, cd, price FROM PC WHERE price<600 AND " +
+                         "cd BETWEEN '12x' AND '24x'") */
+
+                /*   ("SELECT model, speed, ram, cd, price FROM PC WHERE price<600 AND " +
+                           "cd IN('12x' , '24x') ")*/
+                        ("SELECT model, speed, ram, cd, price FROM PC WHERE price<600 AND " +
+                                "cd = '12x' or  cd = '24x'")
+        ) {
+            try (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
+        }
+    }
+    /*05. Укажите производителя и скорость портативных компьютеров с жестким диском объемом не менее 10 Гбайт*/
+    private static void viewLaptop10hd() throws SQLException{
+        try ( PreparedStatement ps = connection.prepareStatement
+                /*("SELECT DISTINCT Product.maker, Laptop.speed FROM Product, Laptop " +
+                        "WHERE Product.model = Laptop.model AND Laptop.hd >= 10")*/
+
+                   ("SELECT DISTINCT Product.maker, Laptop.speed FROM Product JOIN  Laptop " +
+                          "ON Product.model = Laptop.model WHERE Laptop.hd >= 10 ")
+                ){
+            try (ResultSet rs = ps.executeQuery()){
+                printResultSet(rs);
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     private static void initProductDB() throws SQLException {
@@ -190,8 +292,17 @@ public class IronBenchDb {
         }
     }
 
+    private static void showMenuSelect() {
+        System.out.println("01. view PC Price, Output: model, speed and hd < 500 $");
+        System.out.println("02. view Printer Maker, output: maker");
+        System.out.println("03. view Laptop Price, output: model, speed, ram, hd, screen> 1000$");
+        System.out.println("04. view PC Price End CD, output: speed, ram, hd <600 end cd = 12х or 24х ");
+        System.out.println("05. view Laptop 10hd, output: maker, Laptop.speed");
+
+
+    }
+
     private static void showMenu() {
-        System.out.println("01. view PC Price: Output: model, speed and hd < 500 $");
         System.out.println("1. add Product");
         System.out.println("2. view Product");
         System.out.println("3. add PC");
@@ -339,7 +450,7 @@ public class IronBenchDb {
     }
 
     private static void viewProduct() throws SQLException {
-        try (PreparedStatement ps = connection.prepareStatement("SELECT *FROM PC")) {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT *FROM Product")) {
             try (ResultSet rs = ps.executeQuery()) {
                 printResultSet(rs);
             }
@@ -364,7 +475,7 @@ public class IronBenchDb {
     }
 
     private static void viewPrinter() throws SQLException {
-        try (PreparedStatement ps = connection.prepareStatement("SELECT *FROM PC")) {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT *FROM Printer")) {
             try (ResultSet rs = ps.executeQuery()) {
                 printResultSet(rs);
             }
