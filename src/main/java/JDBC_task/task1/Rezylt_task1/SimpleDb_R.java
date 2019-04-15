@@ -16,6 +16,15 @@ package JDBC_task.task1.Rezylt_task1;
  1) Orders (id, title)
  2) Details (id, client_id, address)
 ..................
+Подумать какие связи с таблицей Clients будут у добавляемых таблицах.
+При удалении информации о клиенте должны удаляться все его заказы и детальная информация.
+Основные операции дополнить следующими пунктами:
+ - добавить заказ для клиента
+ - удалить заказ для клиента
+ - вывести все заказы указанного клиента (указывать id клиента)
+ - добавить детализированную информацию для клиента
+ - изменить детализированную информацию для клиента
+ - удалить детализированную информацию для клиента
  */
 
 import java.sql.*;
@@ -38,20 +47,47 @@ public class SimpleDb_R {
         try (Connection conn = DriverManager.getConnection
                 (DB_CONNECTION, DB_USER, DB_PASSWORD)) {
             connection = conn;
-            unitClientsDB(); // метод  - создает таблицу Clients
-            unitOrdersDB(); // таблица Orders
-            unitDetailsDB();// таблица Details
+            //initClientsDB(); // метод  - создает таблицу Clients
+            //initProductDB();   //таблица  Product (id_product, title_product)
+            initOrdersDB(); // таблица Orders
+            initDetailsDB();// таблица Details
 
             while (true) {
                 showMenuClients();
+                showMenuProduct();
                 showMenuOrders();// метод - создание мню в консоли
                 showMenuDetails();
                 String s = sc.nextLine();
                 switch (s) {
-                    case "1.1.":
+                    case "1":
                         addClient();
                         break;
-                    case "1.2.":
+                    case "11":
+                        viewClients();
+                        break;
+                    case "2":
+                        addProduct();
+                        break;
+                    case "22":
+                        viewProduct();
+                        break;
+                    case "3":
+                        addOrders();
+                        break;
+                    case "33":
+                        viewOrders();
+                        break;
+                    case "4":
+                        addDetails();
+                        break;
+                    case "44":
+                        viewDetails();
+                        break;
+                    case "444":
+                        viewDetailsByIdClient();
+                        break;
+
+                    /*case "1.2.":
                         insertRandomClient();
                         break;
                     case "1.3.":
@@ -59,43 +95,30 @@ public class SimpleDb_R {
                         break;
                     case "1.4.":
                         changeClient();
-                        break;
-                    case "1.5.":
-                        viewClients();
-                        break;
-                    case "1.6.":
+                        break;*/
+
+                    /*case "1.6.":
                         viewClientsByAge();
                         break;
                     case "1.7.":
                         viewClientsByName();
-                        break;
-                    case "2.1.":
-                        addOrders();
-                        break;
-                    case "2.2.":
+                        break;*/
+
+                    /*case "2.2.":
                         insertAutoOrders();
                         break;
                     case "2.3.":
                         deleteOrders();
-                        break;
-                    case "2.4.":
-                        viewOrders();
-                        break;
-                    case "2.5.":
+                        break;*/
+
+                    /*case "2.5.":
                         viewOrdersByTitle();
-                        break;
-                    case "3.1.":
-                        addDetails();
-                        break;
-                    case "3.2.":
+                        break;*/
+
+                    /*case "3.2.":
                         deleteDetails();
-                        break;
-                    case "3.3.":
-                        viewDetails();
-                        break;
-                    case "3.4.":
-                        viewDetailsByIdClient();
-                        break;
+                        break;*/
+
                     default:
                         return;
                 }
@@ -106,7 +129,7 @@ public class SimpleDb_R {
     }
 
 
-    private static void unitClientsDB() throws SQLException {
+    private static void initClientsDB() throws SQLException {
         Statement st = connection.createStatement();
         try {
             st.execute("DROP TABLE IF EXISTS Clients");
@@ -119,7 +142,20 @@ public class SimpleDb_R {
         }
     }
 
-    private static void unitOrdersDB() throws SQLException {
+    public static void initProductDB() throws SQLException {
+        Statement st = connection.createStatement();
+        try {
+            st.execute("DROP TABLE IF EXISTS Product");
+            st.execute("CREATE TABLE Product ( " +
+                    "id SERIAL NOT NULL PRIMARY KEY, " +
+                    "id_product  INT NOT NULL," +
+                    "title_product VARCHAR (50))");
+        } finally {
+            st.close();
+        }
+    }
+
+    private static void initOrdersDB() throws SQLException {
         Statement st = connection.createStatement();
         try {
             st.execute("DROP TABLE IF EXISTS Orders");
@@ -130,7 +166,8 @@ public class SimpleDb_R {
             st.close();
         }
     }
-    private static void unitDetailsDB() throws SQLException {
+
+    private static void initDetailsDB() throws SQLException {
         Statement st = connection.createStatement();
         try {
             st.execute("DROP TABLE IF EXISTS Details");
@@ -143,29 +180,38 @@ public class SimpleDb_R {
     }
 
     private static void showMenuClients() {
-        System.out.println("1.1. add client");
-        System.out.println("1.2. add random client");
-        System.out.println("1.3. delete client");
-        System.out.println("1.4. change client");
-        System.out.println("1.5. view clients");
-        System.out.println("1.6. view clients by age");
-        System.out.println("1.7. view clients by part of name");
+        System.out.println("1 - add client");
+        System.out.println("11 - view clients");
+        //System.out.println("1.2. add random client");
+        //System.out.println("1.3. delete client");
+        //System.out.println("1.4. change client");
+        //System.out.println("1.6. view clients by age");
+        //System.out.println("1.7. view clients by part of name");
         System.out.println("------------------------------------ ");
     }
+
+    private static void showMenuProduct() {
+        System.out.println("2 - add product");
+        System.out.println("22 - view product");
+    }
+
     private static void showMenuOrders() {
-        System.out.println("2.1. add orders");
-        System.out.println("2.2. add random orders");
-        System.out.println("2.3. delete orders");
-        System.out.println("2.4. view orders");
-        System.out.println("2.5. view orders by part of title");
+        System.out.println("3 - add orders");
+        System.out.println("33 - view orders");
+        //System.out.println("2.2. add random orders");
+        //System.out.println("2.3. delete orders");
+        //System.out.println("2.5. view orders by part of title");
         System.out.println("------------------------------------ ");
     }
+
     private static void showMenuDetails() {
-        System.out.println("3.1. add details by id client: ");
-        System.out.println("3.2. delete details by id client: ");
-        System.out.println("3.3. view details clients: ");
-        System.out.println("3.4. view details by id client: ");
+        System.out.println("4 - add details by id client: ");
+        System.out.println("44 - view details clients: ");
+        System.out.println("444 - view details by id client: ");
+        //System.out.println("3.2. delete details by id client: ");
     }
+
+//Client
 
     private static void addClient() throws SQLException {
         System.out.println("Enter client name: ");
@@ -182,7 +228,15 @@ public class SimpleDb_R {
         }
     }
 
-    private static void insertRandomClient() throws SQLException {
+    private static void viewClients() throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Clients")) {
+            try (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
+        }
+    }
+
+   /* private static void insertRandomClient() throws SQLException {
         System.out.println("Enter clients count: ");
         String sCount = sc.nextLine();
         int count = Integer.parseInt(sCount);
@@ -233,16 +287,7 @@ public class SimpleDb_R {
 
     }
 
-    private static void viewClients() throws SQLException {
-        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Clients")) {
-            try (ResultSet rs = ps.executeQuery()) {
-                printResultSet(rs);
-            }
-        }
-    }
-
-
-    private static void viewClientsByAge() throws SQLException {
+        private static void viewClientsByAge() throws SQLException {
         System.out.println("Enter min age: ");
         String sAge = sc.nextLine();
         int age = Integer.parseInt(sAge);
@@ -265,7 +310,32 @@ public class SimpleDb_R {
                 printResultSet(rs);
             }
         }
+    }*/
+
+    public static void addProduct() throws SQLException {
+        System.out.println("Enter ID product:");
+        String sIdProd = sc.nextLine();
+        int idProd = Integer.parseInt(sIdProd);
+        System.out.println("Enter title product:");
+        String titlePr = sc.nextLine();
+        try (PreparedStatement ps = connection.prepareStatement("INSERT INTO Product(id_product, title_product) " +
+                "VALUES (?,?)")){
+            ps.setInt(1,idProd);
+            ps.setString(2,titlePr);
+            ps.executeUpdate();
+        }
     }
+
+    public static void viewProduct() throws SQLException {
+        try ( PreparedStatement ps = connection.prepareStatement("SELECT * FROM Product")){
+            try (ResultSet rs = ps.executeQuery()){
+                printResultSet(rs);
+            }
+
+        }
+
+    }
+
     private static void addOrders() throws SQLException {
         System.out.println("Enter order title: ");
         String title = sc.nextLine();
@@ -286,7 +356,7 @@ public class SimpleDb_R {
             try (PreparedStatement ps = connection.prepareStatement("INSERT INTO Orders (title) VALUES (?)")) {
 
                 for (int i = 0; i <= count; i++) {
-                    ps.setString(1, "Title" + (i+1));
+                    ps.setString(1, "Title" + (i + 1));
                     ps.executeUpdate();
                 }
                 connection.commit();
@@ -309,8 +379,8 @@ public class SimpleDb_R {
     }
 
     private static void viewOrders() throws SQLException {
-        try(PreparedStatement ps = connection.prepareStatement("SELECT *FROM Orders")){
-            try(ResultSet rs = ps.executeQuery()){
+        try (PreparedStatement ps = connection.prepareStatement("SELECT *FROM Orders")) {
+            try (ResultSet rs = ps.executeQuery()) {
                 printResultSet(rs);
             }
         }
@@ -319,14 +389,15 @@ public class SimpleDb_R {
     private static void viewOrdersByTitle() throws SQLException {
         System.out.println("Enter part of title: ");
         String titilePart = sc.nextLine();
-        try(PreparedStatement ps = connection.prepareStatement("SELECT *FROM Orders WHERE title like CONCAT " +
-                "('%',?,'%')")){
-            ps.setString(1,titilePart);
-            try(ResultSet rs = ps.executeQuery()){
+        try (PreparedStatement ps = connection.prepareStatement("SELECT *FROM Orders WHERE title like CONCAT " +
+                "('%',?,'%')")) {
+            ps.setString(1, titilePart);
+            try (ResultSet rs = ps.executeQuery()) {
                 printResultSet(rs);
             }
         }
     }
+
     private static void addDetails() throws SQLException {
         System.out.println("Enter id client: ");
         String sIdClient = sc.nextLine();
@@ -362,6 +433,7 @@ public class SimpleDb_R {
             }
         }
     }
+
     private static void viewDetailsByIdClient() {
 
     }
@@ -370,14 +442,14 @@ public class SimpleDb_R {
     private static void printResultSet(ResultSet rs) throws SQLException {
         ResultSetMetaData md = rs.getMetaData();
 
-        for(int i = 1; i<=md.getColumnCount();i++){
-            System.out.print(md.getColumnName(i)+"\t\t");
+        for (int i = 1; i <= md.getColumnCount(); i++) {
+            System.out.print(md.getColumnName(i) + "\t\t");
         }
         System.out.println();
 
-        while (rs.next()){
-            for(int i=1; i<=md.getColumnCount();i++){
-                System.out.print(rs.getString(i)+"\t\t");
+        while (rs.next()) {
+            for (int i = 1; i <= md.getColumnCount(); i++) {
+                System.out.print(rs.getString(i) + "\t\t");
             }
             System.out.println();
         }

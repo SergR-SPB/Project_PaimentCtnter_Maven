@@ -53,7 +53,7 @@ public class IronBenchDb {
 //            initPrinterDB(); //Printer(code, model, color, type, price)
 
             while (true) {
-                showMenu();
+                //showMenu();
                 showMenuSelect();
                 String s = sc.nextLine();
                 switch (s) {
@@ -76,6 +76,31 @@ public class IronBenchDb {
                     case "05":
                         viewLaptop10hd();
                         break;
+
+                    case "06":
+                        viewModelEndPriceOneMaker();
+                        break;
+
+                    case "07":
+                        viewMakerOnlyPCNotInLaptop();
+                        break;
+
+                    case "08":
+                        viewMaxPricePrinter();
+                        break;
+
+                    case "09":
+                        viewAverageSpeedOfThePC();
+                        break;
+
+                    case "10":
+                        viewAverageSpeedOfThePCByMaker();
+                        break;
+
+                    case "11":
+                            viewLaptopSpeedMinPCSpeed();
+                            break;
+
 
                     case "1":
                         addProduct();
@@ -144,8 +169,8 @@ public class IronBenchDb {
                 Связь между этими таблицами (один-ко-многим) допускает наличие модели в таблице Product,
                 которая отсутствовала бы в таблице Printer.  */
 
-                       //("SELECT DISTINCT  maker FROM Product WHERE model IN (SELECT  model FROM Printer)");
-                                   /*ВЫБРАТЬ ОТДЕЛЬНО(без повторений) maker (производитель) ИЗ Product (продукт),  ГДЕ model(модель) в (выберите модель из принтера)*/
+                //("SELECT DISTINCT  maker FROM Product WHERE model IN (SELECT  model FROM Printer)");
+                /*ВЫБРАТЬ ОТДЕЛЬНО(без повторений) maker (производитель) ИЗ Product (продукт),  ГДЕ model(модель) в (выберите модель из принтера)*/
 
                         ("SELECT DISTINCT   maker FROM Product WHERE type = 'Printer'")
         ) {
@@ -155,13 +180,14 @@ public class IronBenchDb {
             }
         }
     }
+
     /*03. Найдите номер модели, объем памяти и размеры экранов портативных компьютеров, цена которых превышает 1000 долларов.*/
     private static void viewLaptopPrice() throws SQLException {
-       try( PreparedStatement ps = connection.prepareStatement("SELECT model, speed, ram, hd, screen, price FROM Laptop WHERE  price>1000")){
-           try (ResultSet rs = ps.executeQuery()){
-               printResultSet(rs);
-           }
-       }
+        try (PreparedStatement ps = connection.prepareStatement("SELECT model, speed, ram, hd, screen, price FROM Laptop WHERE  price>1000")) {
+            try (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
+        }
     }
 
     /*04. Найдите номер модели, скорость и размер жесткого диска ПК, имеющих 12х или 24х CD и цену менее 600 долларов.*/
@@ -181,20 +207,141 @@ public class IronBenchDb {
             }
         }
     }
+
     /*05. Укажите производителя и скорость портативных компьютеров с жестким диском объемом не менее 10 Гбайт*/
-    private static void viewLaptop10hd() throws SQLException{
-        try ( PreparedStatement ps = connection.prepareStatement
+    private static void viewLaptop10hd() throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement
                 /*("SELECT DISTINCT Product.maker, Laptop.speed FROM Product, Laptop " +
                         "WHERE Product.model = Laptop.model AND Laptop.hd >= 10")*/
 
-                   ("SELECT DISTINCT Product.maker, Laptop.speed FROM Product JOIN  Laptop " +
-                          "ON Product.model = Laptop.model WHERE Laptop.hd >= 10 ")
-                ){
+                        ("SELECT DISTINCT Product.maker, Laptop.speed FROM Product JOIN  Laptop " +
+                                "ON Product.model = Laptop.model WHERE Laptop.hd >= 10 ")
+        ) {
+            try (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
+        }
+    }
+
+    /*06. Найдите номера моделей и цены всех продуктов (любого типа) выпущенных производителем B */
+    private static void viewModelEndPriceOneMaker() throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement
+                /*("SELECT model, price FROM PC WHERE model = " +
+                        "(SELECT model FROM Product WHERE  maker = 'A' AND  type = 'PC') " +
+                        "UNION " +
+                        "SELECT model, price FROM Laptop WHERE model = " +
+                        "(SELECT model FROM Product WHERE maker = 'A' AND type = 'Laptop')" +
+                        "UNION " +
+                        "SELECT model, price FROM Printer WHERE model = " +
+                        "(SELECT model FROM Product WHERE maker = 'A' AND type = 'Printer')" +
+                        "" )*/
+                /*("SELECT  model, price FROM PC WHERE model IN (SELECT model FROM product WHERE maker = 'A' AND type ='PC')" +
+                        "UNION " +
+                        "SELECT model, price FROM Laptop WHERE model IN (SELECT model FROM product WHERE maker = 'A' AND type ='Laptop')" +
+                        "UNION " +
+                        "SELECT model, price FROM Printer WHERE model IN (SELECT model FROM product WHERE maker = 'A' AND type ='Printer')" +
+                       "")*/
+                        ("SELECT *FROM " +
+                                "(SELECT model, price FROM PC " +
+                                "UNION " +
+                                "SELECT model, price FROM Laptop " +
+                                "UNION " +
+                                "SELECT model, price FROM Printer )" +
+                                " AS a WHERE a.model IN (SELECT model FROM Product " +
+                                "WHERE maker = 'A')")
+        ) {
+            try (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
+        }
+    }
+
+    /*07. Найдите производителя, продающего ПК, но не портативные компьютеры.*/
+
+    private static void viewMakerOnlyPCNotInLaptop() throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement
+                ("SELECT  DISTINCT  maker " +
+                        "FROM  Product WHERE type = 'PC' " +
+                        "AND " +
+                        "maker NOT IN ( " +
+                        "SELECT maker " +
+                        "FROM Product WHERE type ='Laptop')")
+        ) {
+            try (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
+        }
+    }
+
+    /*08. Найдите самые дорогие принтеры. Вывести: model, price*/
+    private static void viewMaxPricePrinter() throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement
+
+                /*("SELECT model, MAX (DISTINCT price) " +
+                        "FROM Printer " +
+                        "GROUP BY model")*/
+
+                        ("SELECT model, price " +
+                                "FROM Printer " +
+                                "where price IN " +
+                                "(SELECT MAX (price) " +
+                                "FROM Printer)")
+        ) {
+            try (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
+        }
+    }
+
+    /*09.Найдите среднюю скорость ПК*/
+    private static void viewAverageSpeedOfThePC() throws SQLException{
+        try (PreparedStatement ps = connection.prepareStatement
+                ("SELECT AVG (speed) " +
+                        "FROM PC")
+        ){
             try (ResultSet rs = ps.executeQuery()){
                 printResultSet(rs);
             }
         }
     }
+
+    /*10. Найдите среднюю скорость ПК, выпущенных производителем A*/
+    private static void viewAverageSpeedOfThePCByMaker() throws SQLException{
+        try (PreparedStatement ps = connection.prepareStatement
+                ("SELECT AVG (speed) AS avg_speed " +
+                        "FROM PC " +
+                        "WHERE speed IN " +
+                        "(SELECT speed " +
+                        "FROM PC, Product " +
+                        "WHERE Product.model = PC.model AND " +
+                        "maker = 'A')")
+        ){
+            try (ResultSet rs = ps.executeQuery()){
+                printResultSet(rs);
+            }
+        }
+    }
+    /*11. Найдите портативные компьютеры,
+    скорость которых меньше скорости любого из ПК. Вывести: type, model, speed*/
+    private static void viewLaptopSpeedMinPCSpeed() throws SQLException{
+        try (PreparedStatement ps = connection.prepareStatement
+                ("SELECT DISTINCT 'Laptop', model, speed " +
+                        "FROM Laptop " +
+                        "WHERE speed <(SELECT  min (speed) FROM PC)")
+        ) {
+            try (ResultSet rs = ps.executeQuery()){
+                printResultSet(rs);
+            }
+
+        }
+    }
+
+
+
+
+
+
+
 
 
 
@@ -284,9 +431,9 @@ public class IronBenchDb {
                     "id SERIAL NOT NULL PRIMARY KEY, " +
                     "code INT," +
                     "model VARCHAR (50)," +
-                    "color CHAR (1)," +
+                    "color VARCHAR (1)," +
                     "type VARCHAR (10)," +
-                    "price MONEY)");
+                    "price INT )");
         } finally {
             st.close();
         }
@@ -298,6 +445,12 @@ public class IronBenchDb {
         System.out.println("03. view Laptop Price, output: model, speed, ram, hd, screen> 1000$");
         System.out.println("04. view PC Price End CD, output: speed, ram, hd <600 end cd = 12х or 24х ");
         System.out.println("05. view Laptop 10hd, output: maker, Laptop.speed");
+        System.out.println("06. view Model end Price one Maker, output maker, model, price");
+        System.out.println("07. view Maker Only PC Not In Laptop");
+        System.out.println("08. view Max Price Printer, output: model, price");
+        System.out.println("09. view Average Speed Of The PC, output: speed PC");
+        System.out.println("10. view Average Speed Of The PC By Maker");
+        System.out.println("11. view Laptop Speed Min PC Speed, output: type, model, speed");
 
 
     }
@@ -467,7 +620,7 @@ public class IronBenchDb {
 
 
     private static void viewLaptop() throws SQLException {
-        try (PreparedStatement ps = connection.prepareStatement("SELECT *FROM PC")) {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT *FROM Laptop")) {
             try (ResultSet rs = ps.executeQuery()) {
                 printResultSet(rs);
             }
