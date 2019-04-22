@@ -28,7 +28,6 @@ package JDBC_task.task1.Rezylt_task1;
  */
 
 import java.sql.*;
-import java.util.Random;
 import java.util.Scanner;
 
 public class SimpleDb_R {
@@ -47,9 +46,9 @@ public class SimpleDb_R {
         try (Connection conn = DriverManager.getConnection
                 (DB_CONNECTION, DB_USER, DB_PASSWORD)) {
             connection = conn;
-            //initClientsDB(); // метод  - создает таблицу Clients
-            //initProductDB();   //таблица  Product (id_product, title_product)
-            initOrdersDB(); // таблица Orders
+           // initClientsDB(); // метод  - создает таблицу Clients
+           // initProductDB();   //таблица  Product (id_product, title_product)
+           // initOrdersDB(); // таблица Orders
             initDetailsDB();// таблица Details
 
             while (true) {
@@ -65,6 +64,9 @@ public class SimpleDb_R {
                     case "11":
                         viewClients();
                         break;
+                    case "111":
+                        deleteClient();
+                        break;
                     case "2":
                         addProduct();
                         break;
@@ -75,7 +77,19 @@ public class SimpleDb_R {
                         addOrders();
                         break;
                     case "33":
-                        viewOrders();
+                        viewOrdersByIdClient();
+                        break;
+                    case "333":
+                        viewOrdersByIdProduct();
+                        break;
+                    case "334":
+                        viewAllOrders();
+                        break;
+                    case "335":
+                        deleteOrderByClient();
+                        break;
+                    case "336":
+                        deleteClientAllHisOrders();
                         break;
                     case "4":
                         addDetails();
@@ -90,9 +104,7 @@ public class SimpleDb_R {
                     /*case "1.2.":
                         insertRandomClient();
                         break;
-                    case "1.3.":
-                        deleteClient();
-                        break;
+
                     case "1.4.":
                         changeClient();
                         break;*/
@@ -136,6 +148,7 @@ public class SimpleDb_R {
 
             st.execute("CREATE TABLE Clients (" +
                     "id SERIAL NOT NULL PRIMARY KEY, " +
+                    "id_client INT NOT NULL  , " +
                     "name VARCHAR(20) NOT NULL, age INT)");
         } finally {
             st.close();
@@ -161,7 +174,8 @@ public class SimpleDb_R {
             st.execute("DROP TABLE IF EXISTS Orders");
             st.execute("CREATE TABLE Orders(" +
                     "id SERIAL NOT NULL PRIMARY KEY," +
-                    "title VARCHAR (50) NOT NULL )");
+                    "id_client INT NOT NULL  , " +
+                    "id_product INT NOT NULL )");
         } finally {
             st.close();
         }
@@ -172,7 +186,7 @@ public class SimpleDb_R {
         try {
             st.execute("DROP TABLE IF EXISTS Details");
             st.execute("CREATE TABLE Details(id SERIAL NOT NULL PRIMARY KEY," +
-                    "idClient INT NOT NULL, " +
+                    "id_client INT NOT NULL, " +
                     "address VARCHAR (50) NOT NULL )");
         } finally {
             st.close();
@@ -183,7 +197,7 @@ public class SimpleDb_R {
         System.out.println("1 - add client");
         System.out.println("11 - view clients");
         //System.out.println("1.2. add random client");
-        //System.out.println("1.3. delete client");
+        System.out.println("111 delete client");
         //System.out.println("1.4. change client");
         //System.out.println("1.6. view clients by age");
         //System.out.println("1.7. view clients by part of name");
@@ -193,11 +207,16 @@ public class SimpleDb_R {
     private static void showMenuProduct() {
         System.out.println("2 - add product");
         System.out.println("22 - view product");
+        System.out.println("------------------------------------ ");
     }
 
     private static void showMenuOrders() {
-        System.out.println("3 - add orders");
-        System.out.println("33 - view orders");
+        System.out.println("3   - add orders");
+        System.out.println("33  - view orders by client");
+        System.out.println("333 - view orders by product");
+        System.out.println("334 - view all orders");
+        System.out.println("335 - delete order by client");
+        System.out.println("336 - delete client & all his orders");
         //System.out.println("2.2. add random orders");
         //System.out.println("2.3. delete orders");
         //System.out.println("2.5. view orders by part of title");
@@ -214,16 +233,22 @@ public class SimpleDb_R {
 //Client
 
     private static void addClient() throws SQLException {
+        System.out.println("Enter id_client");
+        String sId_client = sc.nextLine();
+        int id_client = Integer.parseInt(sId_client);
+
         System.out.println("Enter client name: ");
         String name = sc.nextLine();
+
         System.out.println("Enter client age: ");
         String sAge = sc.nextLine();
         int age = Integer.parseInt(sAge);
 
         try (PreparedStatement ps = connection.prepareStatement("INSERT INTO " +
-                "Clients (name,age) VALUES (?,?)")) {
-            ps.setString(1, name);
-            ps.setInt(2, age);
+                "Clients (id_client, name,age) VALUES (?, ?,?)")) {
+            ps.setInt(1, id_client);
+            ps.setString(2, name);
+            ps.setInt(3, age);
             ps.executeUpdate();  // ------- for INSERT, UPDATE & DELETE
         }
     }
@@ -257,7 +282,7 @@ public class SimpleDb_R {
         } finally {
             connection.setAutoCommit(true); // ---------return to default mode
         }
-    }
+    }*/
 
     private static void deleteClient() throws SQLException {
         System.out.println("Enter client ID: ");
@@ -270,7 +295,7 @@ public class SimpleDb_R {
         }
     }
 
-    private static void changeClient() throws SQLException {
+    /*private static void changeClient() throws SQLException {
         System.out.println("Enter clients name: ");
         String name = sc.nextLine();
 
@@ -315,13 +340,13 @@ public class SimpleDb_R {
     public static void addProduct() throws SQLException {
         System.out.println("Enter ID product:");
         String sIdProd = sc.nextLine();
-        int idProd = Integer.parseInt(sIdProd);
+        int id_product = Integer.parseInt(sIdProd);
         System.out.println("Enter title product:");
-        String titlePr = sc.nextLine();
+        String title_product = sc.nextLine();
         try (PreparedStatement ps = connection.prepareStatement("INSERT INTO Product(id_product, title_product) " +
                 "VALUES (?,?)")){
-            ps.setInt(1,idProd);
-            ps.setString(2,titlePr);
+            ps.setInt(1,id_product);
+            ps.setString(2,title_product);
             ps.executeUpdate();
         }
     }
@@ -331,17 +356,23 @@ public class SimpleDb_R {
             try (ResultSet rs = ps.executeQuery()){
                 printResultSet(rs);
             }
-
         }
-
     }
 
     private static void addOrders() throws SQLException {
-        System.out.println("Enter order title: ");
-        String title = sc.nextLine();
+        viewClients(); // Для выбора искомого клиента
+        System.out.println("Enter id client");
+        String sId_client = sc.nextLine();
+        int id_client = Integer.parseInt(sId_client);
 
-        try (PreparedStatement ps = connection.prepareStatement("INSERT INTO Orders(title) VALUES (?)")) {
-            ps.setString(1, title);
+        viewProduct(); // Для выбора искомого продукта
+        System.out.println("Enter id product");
+        String sId_product = sc.nextLine();
+        int id_product = Integer.parseInt(sId_product);
+
+        try (PreparedStatement ps = connection.prepareStatement("INSERT INTO Orders(id_client, id_product) VALUES (?,?)")) {
+            ps.setInt(1, id_client);
+            ps.setInt(2, id_product);
             ps.executeUpdate();
         }
     }
@@ -378,15 +409,113 @@ public class SimpleDb_R {
         }
     }
 
-    private static void viewOrders() throws SQLException {
-        try (PreparedStatement ps = connection.prepareStatement("SELECT *FROM Orders")) {
+    //- вывести все заказы указанного клиента (указывать id клиента)
+
+    private static void viewOrdersByIdClient() throws SQLException {
+
+        viewClients(); // Для выбора искомого клиента
+
+        System.out.println("Enter orders id_client: ");
+        String sId = sc.nextLine();
+        int id_client = Integer.parseInt(sId);
+
+        try (PreparedStatement ps = connection.prepareStatement
+                ("SELECT Orders.id_client, Clients.name, " +
+                      //"Orders.id_product,  " +
+                        "Product.title_product " +
+                        "FROM Orders " +
+                        "JOIN Clients ON Orders.id_client = Clients.id_client " +
+                        "JOIN Product ON Orders.id_product = Product.id_product " +
+                        "WHERE Clients.id_client =" + id_client )) {
             try (ResultSet rs = ps.executeQuery()) {
                 printResultSet(rs);
             }
         }
     }
 
-    private static void viewOrdersByTitle() throws SQLException {
+    private static void viewOrdersByIdProduct() throws SQLException {
+        viewProduct(); // Для выбора искомого продукта
+
+        System.out.println("Enter  id_product: ");
+        String sId = sc.nextLine();
+        int id_product = Integer.parseInt(sId);
+
+        try (PreparedStatement ps = connection.prepareStatement
+
+                ("SELECT Product.id_product, Product.title_product, Clients.name " +
+
+                        "FROM Orders " +
+                        "JOIN Clients ON Orders.id_client = Clients.id_client " +
+                        "JOIN Product ON Orders.id_product = Product.id_product " +
+                        "WHERE Product.id_product =" + id_product )) {
+            try (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
+        }
+    }
+
+    //- вывести все заказы
+
+    private static void viewAllOrders() throws SQLException {
+
+        try (PreparedStatement ps = connection.prepareStatement
+                ("SELECT Orders.id_client, Clients.name, " +
+                        //"Orders.id_product,  " +
+                        "Product.title_product " +
+                        "FROM Orders " +
+                        "JOIN Clients ON Orders.id_client = Clients.id_client " +
+                        "JOIN Product ON Orders.id_product = Product.id_product ")) {
+            try (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
+        }
+    }
+
+    private static void deleteOrderByClient () throws SQLException{
+        System.out.println("Enter id client to delete his orders");
+        String sId = sc.nextLine();
+        int id = Integer.parseInt(sId);
+
+        try (PreparedStatement ps = connection.prepareStatement
+                ("DELETE FROM Orders WHERE id_client=" + id)) {
+            ps.executeUpdate();
+        }
+    }
+
+    private static void deleteClientAllHisOrders() throws SQLException{
+        viewClients();
+        System.out.println("Enter id client to delete & his orders");
+        String sId = sc.nextLine();
+        int id = Integer.parseInt(sId);
+
+        connection.setAutoCommit(false);
+
+        try (PreparedStatement ps = connection.prepareStatement
+               /* ("DELETE FROM Clients , Orders" +
+                         "WHERE Clients.id_client = Orders.id_client " +
+                         "AND Clients.id_client =" + id ))*/
+
+                ("DELETE FROM Clients WHERE id_client=" + id+
+                          " ; DELETE FROM Orders WHERE id_client=" + id)
+
+                        /*("DELETE Clients.* , Orders.* from Clients , Orders " +
+                                "WHERE Clients.id_client = Orders.id_client AND Clients.id_client="+id)*/
+        )
+             {
+            ps.executeUpdate();
+            connection.commit();
+        }
+        catch (Exception ex) {
+            connection.rollback();
+        }finally {
+            connection.setAutoCommit(true);
+        }
+    }
+
+
+
+
+   /* private static void viewOrdersByTitle() throws SQLException {
         System.out.println("Enter part of title: ");
         String titilePart = sc.nextLine();
         try (PreparedStatement ps = connection.prepareStatement("SELECT *FROM Orders WHERE title like CONCAT " +
@@ -396,20 +525,20 @@ public class SimpleDb_R {
                 printResultSet(rs);
             }
         }
-    }
+    }*/
 
     private static void addDetails() throws SQLException {
         System.out.println("Enter id client: ");
-        String sIdClient = sc.nextLine();
-        int idClient = Integer.parseInt(sIdClient);
+        String sIdC = sc.nextLine();
+        int id = Integer.parseInt(sIdC);
 
         System.out.println("Enter address client: ");
         String address = sc.nextLine();
 
         try (PreparedStatement ps = connection.prepareStatement(
-                "INSERT INTO Details(idClient,address)" +
+                "INSERT INTO Details(id_client,address)" +
                         "VALUES (?,?)")) {
-            ps.setInt(1, idClient);
+            ps.setInt(1, id);
             ps.setString(2, address);
             ps.executeUpdate();
         }
