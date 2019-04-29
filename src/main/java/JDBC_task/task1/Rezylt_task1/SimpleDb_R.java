@@ -46,17 +46,20 @@ public class SimpleDb_R {
         try (Connection conn = DriverManager.getConnection
                 (DB_CONNECTION, DB_USER, DB_PASSWORD)) {
             connection = conn;
-           // initClientsDB(); // метод  - создает таблицу Clients
-           // initProductDB();   //таблица  Product (id_product, title_product)
-           // initOrdersDB(); // таблица Orders
-            initDetailsDB();// таблица Details
+            // initClientsDB(); // метод  - создает таблицу Clients
+            // initProductDB();   //таблица  Product (id_product, title_product)
+            // initOrdersDB(); // таблица Orders
+            // initDetailsDB();// таблица Details
 
             while (true) {
+
                 showMenuClients();
                 showMenuProduct();
-                showMenuOrders();// метод - создание мню в консоли
+                showMenuOrders();
                 showMenuDetails();
+
                 String s = sc.nextLine();
+
                 switch (s) {
                     case "1":
                         addClient();
@@ -100,6 +103,13 @@ public class SimpleDb_R {
                     case "444":
                         viewDetailsByIdClient();
                         break;
+                    case "445":
+                        deleteClientAllHisDetails();
+                        break;
+                    case "446":
+                        changeDetailsByIdClients();
+                        break;
+
 
                     /*case "1.2.":
                         insertRandomClient();
@@ -227,6 +237,8 @@ public class SimpleDb_R {
         System.out.println("4 - add details by id client: ");
         System.out.println("44 - view details clients: ");
         System.out.println("444 - view details by id client: ");
+        System.out.println("445 - delete Client All His Details:");
+        System.out.println("446 - change Details By Id Clients:");
         //System.out.println("3.2. delete details by id client: ");
     }
 
@@ -344,16 +356,16 @@ public class SimpleDb_R {
         System.out.println("Enter title product:");
         String title_product = sc.nextLine();
         try (PreparedStatement ps = connection.prepareStatement("INSERT INTO Product(id_product, title_product) " +
-                "VALUES (?,?)")){
-            ps.setInt(1,id_product);
-            ps.setString(2,title_product);
+                "VALUES (?,?)")) {
+            ps.setInt(1, id_product);
+            ps.setString(2, title_product);
             ps.executeUpdate();
         }
     }
 
     public static void viewProduct() throws SQLException {
-        try ( PreparedStatement ps = connection.prepareStatement("SELECT * FROM Product")){
-            try (ResultSet rs = ps.executeQuery()){
+        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Product")) {
+            try (ResultSet rs = ps.executeQuery()) {
                 printResultSet(rs);
             }
         }
@@ -421,12 +433,12 @@ public class SimpleDb_R {
 
         try (PreparedStatement ps = connection.prepareStatement
                 ("SELECT Orders.id_client, Clients.name, " +
-                      //"Orders.id_product,  " +
+                        //"Orders.id_product,  " +
                         "Product.title_product " +
                         "FROM Orders " +
                         "JOIN Clients ON Orders.id_client = Clients.id_client " +
                         "JOIN Product ON Orders.id_product = Product.id_product " +
-                        "WHERE Clients.id_client =" + id_client )) {
+                        "WHERE Clients.id_client =" + id_client)) {
             try (ResultSet rs = ps.executeQuery()) {
                 printResultSet(rs);
             }
@@ -447,7 +459,7 @@ public class SimpleDb_R {
                         "FROM Orders " +
                         "JOIN Clients ON Orders.id_client = Clients.id_client " +
                         "JOIN Product ON Orders.id_product = Product.id_product " +
-                        "WHERE Product.id_product =" + id_product )) {
+                        "WHERE Product.id_product =" + id_product)) {
             try (ResultSet rs = ps.executeQuery()) {
                 printResultSet(rs);
             }
@@ -471,7 +483,7 @@ public class SimpleDb_R {
         }
     }
 
-    private static void deleteOrderByClient () throws SQLException{
+    private static void deleteOrderByClient() throws SQLException {
         System.out.println("Enter id client to delete his orders");
         String sId = sc.nextLine();
         int id = Integer.parseInt(sId);
@@ -482,7 +494,7 @@ public class SimpleDb_R {
         }
     }
 
-    private static void deleteClientAllHisOrders() throws SQLException{
+    private static void deleteClientAllHisOrders() throws SQLException {
         viewClients();
         System.out.println("Enter id client to delete & his orders");
         String sId = sc.nextLine();
@@ -491,23 +503,21 @@ public class SimpleDb_R {
         connection.setAutoCommit(false);
 
         try (PreparedStatement ps = connection.prepareStatement
-               /* ("DELETE FROM Clients , Orders" +
-                         "WHERE Clients.id_client = Orders.id_client " +
-                         "AND Clients.id_client =" + id ))*/
+                /* ("DELETE FROM Clients , Orders" +
+                          "WHERE Clients.id_client = Orders.id_client " +
+                          "AND Clients.id_client =" + id ))*/
 
-                ("DELETE FROM Clients WHERE id_client=" + id+
-                          " ; DELETE FROM Orders WHERE id_client=" + id)
+                        ("DELETE FROM Clients WHERE id_client=" + id +
+                                " ; DELETE FROM Orders WHERE id_client=" + id)
 
                         /*("DELETE Clients.* , Orders.* from Clients , Orders " +
                                 "WHERE Clients.id_client = Orders.id_client AND Clients.id_client="+id)*/
-        )
-             {
+        ) {
             ps.executeUpdate();
             connection.commit();
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             connection.rollback();
-        }finally {
+        } finally {
             connection.setAutoCommit(true);
         }
     }
@@ -528,6 +538,7 @@ public class SimpleDb_R {
     }*/
 
     private static void addDetails() throws SQLException {
+        viewClients();
         System.out.println("Enter id client: ");
         String sIdC = sc.nextLine();
         int id = Integer.parseInt(sIdC);
@@ -556,15 +567,70 @@ public class SimpleDb_R {
     }
 
     private static void viewDetails() throws SQLException {
-        try (PreparedStatement ps = connection.prepareStatement("SELECT *FROM Details")) {
+        try (PreparedStatement ps = connection.prepareStatement
+                ("SELECT Details.id_client, Clients.name, " +
+                        "Details.address " +
+                        "FROM Details, Clients " +
+                        "WHERE Clients.id_client=Details.id_client")) {
             try (ResultSet rs = ps.executeQuery()) {
                 printResultSet(rs);
             }
         }
     }
 
-    private static void viewDetailsByIdClient() {
+    private static void viewDetailsByIdClient() throws SQLException {
+        viewClients();
+        System.out.println("Enter id clients:");
+        String sId = sc.nextLine();
+        int id_cl = Integer.parseInt(sId);
 
+        try (PreparedStatement ps = connection.prepareStatement
+                ("SELECT Details.id_client, Clients.name, " +
+                        "Details.address " +
+                        "FROM Details, Clients " +
+                        "WHERE  Details.id_client =Clients.id_client "+
+                        "AND Details.id_client =" + id_cl)) {
+            try (ResultSet rs = ps.executeQuery()) {
+                printResultSet(rs);
+            }
+        }
+    }
+
+    private static void deleteClientAllHisDetails() throws SQLException {
+        viewClients();
+        System.out.println("Enter id clients:");
+        String sId = sc.nextLine();
+        int id = Integer.parseInt(sId);
+        connection.setAutoCommit(false);
+        try (PreparedStatement ps = connection.prepareStatement
+                ("DELETE FROM Clients WHERE id_client=" + id +
+                        " ; DELETE FROM Details WHERE id_client=" + id)) {
+            ps.executeUpdate();
+            connection.commit();
+        } catch (Exception ex) {
+            connection.rollback();
+        } finally {
+            connection.setAutoCommit(true);
+        }
+    }
+
+    private static void changeDetailsByIdClients() throws SQLException{
+
+        viewClients();
+        System.out.println("Enter id clients to change details");
+        String sId = sc.nextLine();
+        int id_C = Integer.parseInt(sId);
+
+        System.out.println("Enter new address by this client");
+        String address =sc.nextLine();
+
+        try (PreparedStatement ps = connection.prepareStatement
+                ("UPDATE Details SET address = ? WHERE  id_client = ?")){
+            ps.setString(1, address);
+            ps.setInt(2,id_C);
+            ps.executeUpdate();
+        }
+        viewDetailsByIdClient();
     }
 
 
@@ -583,4 +649,6 @@ public class SimpleDb_R {
             System.out.println();
         }
     }
+
+
 }
